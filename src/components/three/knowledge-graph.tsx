@@ -13,7 +13,7 @@
 
 import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import * as THREE from 'three';
 import {
   CATEGORY_COLOR,
@@ -87,6 +87,7 @@ function InstancedNodes({
     return { geometry, material };
   }, []);
 
+  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup; the compiler rule cannot track THREE.Object3D mutation. */
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -104,6 +105,7 @@ function InstancedNodes({
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }, [baseColors, scales]);
+  /* eslint-enable react-hooks/immutability */
 
   useEffect(
     () => () => {
@@ -318,7 +320,7 @@ function HoverLabel({ id }: { id: number }) {
 
 function CameraRig({ selectedId }: { selectedId: number | null }) {
   const { camera } = useThree();
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
   const targetRef = useRef(new THREE.Vector3(0, 0, 0));
   const cameraRef = useRef(new THREE.Vector3(0, 0.6, 7.6));
   const initializedRef = useRef(false);
