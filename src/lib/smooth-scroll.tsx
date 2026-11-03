@@ -32,7 +32,26 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     document.documentElement.classList.add("lenis");
 
+    // Delegated document-level handler for in-page anchors. Intercepts
+    // `a[href^="#"]` and hands the scroll to Lenis so navigation matches the
+    // site's smooth-scroll feel instead of jumping instantly.
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as Element | null;
+      const anchor = target?.closest?.(
+        'a[href^="#"]',
+      ) as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const href = anchor.getAttribute("href");
+      if (!href || href === "#" || href.length < 2) return;
+      const el = document.querySelector(href);
+      if (!el) return;
+      event.preventDefault();
+      lenis.scrollTo(el as HTMLElement, { duration: 1.2 });
+    };
+    document.addEventListener("click", handleClick);
+
     return () => {
+      document.removeEventListener("click", handleClick);
       document.documentElement.classList.remove("lenis");
       gsap.ticker.remove(update);
       lenis.destroy();
