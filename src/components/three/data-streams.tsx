@@ -101,7 +101,7 @@ void main() {
 
 function PulseLines() {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const geometry = useMemo(() => {
+  const { geometry, material } = useMemo(() => {
     const positions: number[] = [];
     const progress: number[] = [];
 
@@ -132,7 +132,7 @@ function PulseLines() {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
 
-    materialRef.current = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -145,30 +145,31 @@ function PulseLines() {
       vertexShader: STREAM_VERT,
       fragmentShader: STREAM_FRAG,
     });
+    materialRef.current = material;
 
-    return geometry;
+    return { geometry, material };
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      materialRef.current.dispose();
+      material.dispose();
     },
-    [geometry],
+    [geometry, material],
   );
 
   useFrame(({ clock }) => {
     materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <lineSegments geometry={geometry} material={materialRef.current} />;
+  return <lineSegments geometry={geometry} material={material} />;
 }
 
 function GlowingCore() {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const geometry = useMemo(() => {
+  const { geometry, material } = useMemo(() => {
     const geometry = new THREE.SphereGeometry(0.55, 48, 48);
-    materialRef.current = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -179,22 +180,23 @@ function GlowingCore() {
       vertexShader: CORE_VERT,
       fragmentShader: CORE_FRAG,
     });
-    return geometry;
+    materialRef.current = material;
+    return { geometry, material };
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      materialRef.current.dispose();
+      material.dispose();
     },
-    [geometry],
+    [geometry, material],
   );
 
   useFrame(({ clock }) => {
     materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <mesh geometry={geometry} material={materialRef.current} />;
+  return <mesh geometry={geometry} material={material} />;
 }
 
 function DustField() {
