@@ -93,7 +93,7 @@ export default function Problem() {
         coreRef.current,
         { scale: 0, opacity: 0 },
         { scale: 1, opacity: 1, ease: 'back.out(1.6)', duration: 0.6 },
-        labels.length * 0.06 + 0.2,
+        CHIPS.length * 0.06 + 0.2,
       )
     }, sectionRef)
     return () => ctx.revert()
