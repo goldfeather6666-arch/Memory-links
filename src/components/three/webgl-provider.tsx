@@ -69,7 +69,9 @@ export function NebulaFallback({ ariaHidden = true }: { ariaHidden?: boolean }) 
 
 /* ------------------------------------------------------------------ *
  * WebGLWrapper — renders children when WebGL is supported, otherwise the
- * static fallback. Re-measures after mount to avoid SSR mismatch.
+ * static fallback. The probe resolves asynchronously; until it settles we
+ * render the fallback so the 3D Canvas mounts exactly once at the correct
+ * size (avoiding a second synchronous mount root teardown).
  * ------------------------------------------------------------------ */
 
 interface WebGLWrapperProps {
@@ -78,15 +80,14 @@ interface WebGLWrapperProps {
 }
 
 export function WebGLWrapper({ children, fallback }: WebGLWrapperProps) {
-  const [supported, setSupported] = useState(true)
+  const [supported, setSupported] = useState<boolean | null>(null)
 
   useEffect(() => {
-    // Probe asynchronously so the first (SSR-safe) render is not a false negative.
     const id = requestAnimationFrame(() => setSupported(detectWebGL()))
     return () => cancelAnimationFrame(id)
   }, [])
 
-  const canRender = supported
+  const canRender = supported === true
 
   return (
     <WebGLContext.Provider value={canRender}>
