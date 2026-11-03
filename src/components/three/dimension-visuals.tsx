@@ -9,6 +9,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { makeRandom } from './shaders'
+import { useInView } from '../../lib/hooks/use-in-view'
 
 function LineNet({ pairs, color = '#5a4a9a', opacity = 0.5 }: { pairs: number[]; color?: string; opacity?: number }) {
   const geometry = useMemo(() => {
@@ -54,16 +55,20 @@ function TimelineScene() {
 }
 
 export function EpisodicTimeline() {
+  const { ref, inView } = useInView<HTMLDivElement>()
   return (
-    <Canvas camera={{ position: [0, 0, 9], fov: 40 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
-      <ambientLight intensity={1.2} />
-      <TimelineScene />
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas camera={{ position: [0, 0, 9], fov: 40 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
+        <ambientLight intensity={1.2} />
+        <TimelineScene />
+      </Canvas>
+    </div>
   )
 }
 
 /** Interconnected knowledge cluster. */
 export function SemanticNodes() {
+  const { ref, inView } = useInView<HTMLDivElement>()
   const sats = useMemo(() => {
     const rand = makeRandom(33)
     return Array.from({ length: 16 }, (_, i) => {
@@ -78,22 +83,24 @@ export function SemanticNodes() {
     return out
   }, [sats])
   return (
-    <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
-      <ambientLight intensity={1.3} />
-      <SpinGroup speed={0.12}>
-        <mesh>
-          <sphereGeometry args={[0.5, 20, 20]} />
-          <meshBasicMaterial color="#8f6cff" />
-        </mesh>
-        {sats.map((p, i) => (
-          <mesh key={i} position={[p[0], p[1], p[2]]}>
-            <sphereGeometry args={[0.09, 12, 12]} />
-            <meshBasicMaterial color="#7cc7ff" />
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
+        <ambientLight intensity={1.3} />
+        <SpinGroup speed={0.12}>
+          <mesh>
+            <sphereGeometry args={[0.5, 20, 20]} />
+            <meshBasicMaterial color="#8f6cff" />
           </mesh>
-        ))}
-        <LineNet pairs={pairs} color="#5a4a9a" />
-      </SpinGroup>
-    </Canvas>
+          {sats.map((p, i) => (
+            <mesh key={i} position={[p[0], p[1], p[2]]}>
+              <sphereGeometry args={[0.09, 12, 12]} />
+              <meshBasicMaterial color="#7cc7ff" />
+            </mesh>
+          ))}
+          <LineNet pairs={pairs} color="#5a4a9a" />
+        </SpinGroup>
+      </Canvas>
+    </div>
   )
 }
 
@@ -139,16 +146,20 @@ function PathScene() {
 }
 
 export function ProceduralPath() {
+  const { ref, inView } = useInView<HTMLDivElement>()
   return (
-    <Canvas camera={{ position: [0, 0, 8], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
-      <ambientLight intensity={1.3} />
-      <PathScene />
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
+        <ambientLight intensity={1.3} />
+        <PathScene />
+      </Canvas>
+    </div>
   )
 }
 
 /** Small dynamic 3D graph. */
 export function AssociativeGraph() {
+  const { ref, inView } = useInView<HTMLDivElement>()
   const pts = useMemo(() => {
     const rand = makeRandom(77)
     return Array.from({ length: 34 }, () => [(rand() - 0.5) * 5, (rand() - 0.5) * 3.4, (rand() - 0.5) * 5] as [number, number, number])
@@ -164,17 +175,19 @@ export function AssociativeGraph() {
     return out
   }, [pts])
   return (
-    <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
-      <ambientLight intensity={1.3} />
-      <SpinGroup speed={0.09}>
-        {pts.map((p, i) => (
-          <mesh key={i} position={p}>
-            <sphereGeometry args={[0.07, 10, 10]} />
-            <meshBasicMaterial color="#9cc0ff" />
-          </mesh>
-        ))}
-        <LineNet pairs={pairs} color="#4a4a7a" opacity={0.35} />
-      </SpinGroup>
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
+        <ambientLight intensity={1.3} />
+        <SpinGroup speed={0.09}>
+          {pts.map((p, i) => (
+            <mesh key={i} position={p}>
+              <sphereGeometry args={[0.07, 10, 10]} />
+              <meshBasicMaterial color="#9cc0ff" />
+            </mesh>
+          ))}
+          <LineNet pairs={pairs} color="#4a4a7a" opacity={0.35} />
+        </SpinGroup>
+      </Canvas>
+    </div>
   )
 }
