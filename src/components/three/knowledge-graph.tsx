@@ -13,7 +13,14 @@
 
 import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentRef,
+  type RefObject,
+} from 'react';
 import * as THREE from 'three';
 import {
   CATEGORY_COLOR,
@@ -77,7 +84,15 @@ function InstancedNodes({
     [],
   );
   const baseColors = useMemo(
-    () => NODES.map((n) => new THREE.Color(CATEGORY_COLORS[n.category].r, CATEGORY_COLORS[n.category].g, CATEGORY_COLORS[n.category].b)),
+    () =>
+      NODES.map(
+        (n) =>
+          new THREE.Color(
+            CATEGORY_COLORS[n.category].r,
+            CATEGORY_COLORS[n.category].g,
+            CATEGORY_COLORS[n.category].b,
+          ),
+      ),
     [],
   );
 
@@ -143,11 +158,17 @@ function InstancedNodes({
         const isSelected = i === selected;
         const isConnected = connected.has(i);
         if (isSelected) {
-          mesh.setColorAt(i, baseColors[i].clone().lerp(new THREE.Color('#ffffff'), 0.45));
+          mesh.setColorAt(
+            i,
+            baseColors[i].clone().lerp(new THREE.Color('#ffffff'), 0.45),
+          );
         } else if (isConnected) {
           mesh.setColorAt(i, baseColors[i]);
         } else {
-          mesh.setColorAt(i, baseColors[i].clone().multiplyScalar(DIM_FACTOR));
+          mesh.setColorAt(
+            i,
+            baseColors[i].clone().multiplyScalar(DIM_FACTOR),
+          );
         }
       }
     }
@@ -156,7 +177,10 @@ function InstancedNodes({
 
   const applyHoverScale = (hovered: number | null) => {
     if (hovered === null) {
-      applyScales(new Set(Array.from({ length: NODE_COUNT }, (_, i) => i)), 1);
+      applyScales(
+        new Set(Array.from({ length: NODE_COUNT }, (_, i) => i)),
+        1,
+      );
       return;
     }
     applyScales(new Set([hovered]), 1.5);
@@ -292,7 +316,12 @@ function HoverLabel({ id }: { id: number }) {
   const node = NODES[id];
   if (!node) return null;
   return (
-    <Html center position={[node.x, node.y + 0.45, node.z]} zIndexRange={[20, 0]} distanceFactor={6}>
+    <Html
+      center
+      position={[node.x, node.y + 0.45, node.z]}
+      zIndexRange={[20, 0]}
+      distanceFactor={6}
+    >
       <div
         style={{
           background: 'rgba(16, 15, 26, 0.85)',
@@ -324,17 +353,23 @@ function CameraRig({ selectedId }: { selectedId: number | null }) {
   const targetRef = useRef(new THREE.Vector3(0, 0, 0));
   const cameraRef = useRef(new THREE.Vector3(0, 0.6, 7.6));
   const initializedRef = useRef(false);
+  // Only lerp/override the camera during a short transition window after a
+  // selection change. Idle frames leave OrbitControls entirely alone so the
+  // user's drag/zoom damping is never fought.
+  const transitionUntilRef = useRef(-Infinity);
 
   useEffect(() => {
     if (selectedId == null) {
       targetRef.current.set(0, 0, 0);
       cameraRef.current.set(0, 0.6, 7.6);
-      return;
+    } else {
+      const node = NODES[selectedId];
+      targetRef.current.set(node.x, node.y, node.z);
+      const offset = new THREE.Vector3(0, 0.6, 3.4);
+      cameraRef.current.copy(targetRef.current).add(offset);
     }
-    const node = NODES[selectedId];
-    targetRef.current.set(node.x, node.y, node.z);
-    const offset = new THREE.Vector3(0, 0.6, 3.4);
-    cameraRef.current.copy(targetRef.current).add(offset);
+    transitionUntilRef.current =
+      performance.now() + (selectedId == null ? 900 : 1100);
   }, [selectedId]);
 
   useFrame(() => {
@@ -344,35 +379,79 @@ function CameraRig({ selectedId }: { selectedId: number | null }) {
       controls.target.copy(targetRef.current);
       initializedRef.current = true;
     }
-    controls.target.lerp(targetRef.current, 0.08);
-    camera.position.lerp(cameraRef.current, 0.08);
-    controls.update();
+    if (performance.now() < transitionUntilRef.current) {
+      controls.target.lerp(targetRef.current, 0.08);
+      camera.position.lerp(cameraRef.current, 0.08);
+      controls.update();
+    }
   });
 
-  return <OrbitControls ref={controlsRef} enableDamping dampingFactor={0.08} rotateSpeed={0.6} zoomSpeed={0.7} />;
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enableDamping
+      dampingFactor={0.08}
+      rotateSpeed={0.6}
+      zoomSpeed={0.7}
+    />
+  );
+}
+
+/**
+ * Local in-view hook. The shared `@/lib/hooks/use-in-view` module is not
+ * present in this repo, so this component owns an equivalent implementation
+ * (IntersectionObserver-backed) to drive `frameloop` so the WebGL loop only
+ * runs while the graph is actually on screen.
+ */
+function useInView<T extends HTMLElement>(ref: RefObject<T | null>): boolean {
+  const [inView, setInView] = useState(true);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return inView;
 }
 
 export default function KnowledgeGraph() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
 
   return (
-    <Canvas
-      camera={{ position: [0, 0.6, 7.6], fov: 50 }}
-      gl={{ antialias: true, alpha: true }}
-      dpr={[1, 2]}
-      style={{ width: '100%', height: '100%', display: 'block' }}
-      onPointerMissed={() => setSelectedId(null)}
-    >
-      <InstancedNodes
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        hoveredId={hoveredId}
-        onHovered={setHoveredId}
-      />
-      <EdgeLines selectedId={selectedId} />
-      {hoveredId != null && <HoverLabel id={hoveredId} />}
-      <CameraRig selectedId={selectedId} />
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas
+        frameloop={inView ? 'always' : 'never'}
+        camera={{ position: [0, 0.6, 7.6], fov: 50 }}
+        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+        style={{ width: '100%', height: '100%', display: 'block' }}
+        onPointerMissed={() => setSelectedId(null)}
+      >
+        <InstancedNodes
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          hoveredId={hoveredId}
+          onHovered={setHoveredId}
+        />
+        <EdgeLines selectedId={selectedId} />
+        {hoveredId != null && <HoverLabel id={hoveredId} />}
+        <CameraRig selectedId={selectedId} />
+      </Canvas>
+    </div>
   );
 }
