@@ -12,6 +12,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useInView } from '../../lib/hooks/use-in-view';
 
 type Vec3 = [number, number, number];
 
@@ -213,14 +214,18 @@ function SceneContent() {
 }
 
 export default function AgentMemory() {
+  const { ref, inView } = useInView<HTMLDivElement>();
   return (
-    <Canvas
-      camera={{ position: [0, 0.6, 7.6], fov: 50 }}
-      gl={{ antialias: true, alpha: true }}
-      dpr={[1, 2]}
-      style={{ width: '100%', height: '100%', display: 'block' }}
-    >
-      <SceneContent />
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas
+        camera={{ position: [0, 0.6, 7.6], fov: 50 }}
+        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+        frameloop={inView ? 'always' : 'never'}
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      >
+        <SceneContent />
+      </Canvas>
+    </div>
   );
 }
