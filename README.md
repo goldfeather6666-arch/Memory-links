@@ -6,7 +6,8 @@ scrolling, and `motion` for UI animation.
 
 ## Stack
 
-- [Next.js](https://nextjs.org) 15 (App Router)
+- [Next.js](https://nextjs.org) 16 (App Router)
+- ESLint 9 + eslint-config-next (flat config)
 - React 19
 - TypeScript 5.8
 - Tailwind CSS v4 (`@tailwindcss/postcss`)
