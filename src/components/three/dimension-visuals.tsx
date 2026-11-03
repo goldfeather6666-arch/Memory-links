@@ -150,7 +150,7 @@ export function AssociativeGraph() {
       out.push(...pts[a], ...pts[b])
     }
     return out
-  }, [])
+  }, [pts])
   return (
     <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
       <ambientLight intensity={1.3} />
