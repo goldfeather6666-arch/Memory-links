@@ -79,7 +79,7 @@ void main() {
 
 function AgentLines() {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const geometry = useMemo(() => {
+  const { geometry, material } = useMemo(() => {
     const positions: number[] = [];
     const progress: number[] = [];
     const colors: number[] = [];
@@ -98,7 +98,7 @@ function AgentLines() {
     geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-    materialRef.current = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -110,30 +110,31 @@ function AgentLines() {
       vertexShader: PULSE_VERT,
       fragmentShader: PULSE_FRAG,
     });
+    materialRef.current = material;
 
-    return geometry;
+    return { geometry, material };
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      materialRef.current.dispose();
+      material.dispose();
     },
-    [geometry],
+    [geometry, material],
   );
 
   useFrame(({ clock }) => {
     materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <lineSegments geometry={geometry} material={materialRef.current} />;
+  return <lineSegments geometry={geometry} material={material} />;
 }
 
 function MemoryCore() {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const geometry = useMemo(() => {
+  const { geometry, material } = useMemo(() => {
     const geometry = new THREE.SphereGeometry(0.62, 48, 48);
-    materialRef.current = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -144,22 +145,23 @@ function MemoryCore() {
       vertexShader: CORE_VERT,
       fragmentShader: CORE_FRAG,
     });
-    return geometry;
+    materialRef.current = material;
+    return { geometry, material };
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      materialRef.current.dispose();
+      material.dispose();
     },
-    [geometry],
+    [geometry, material],
   );
 
   useFrame(({ clock }) => {
     materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <mesh geometry={geometry} material={materialRef.current} />;
+  return <mesh geometry={geometry} material={material} />;
 }
 
 function AgentNode({ agent }: { agent: AgentDef }) {
