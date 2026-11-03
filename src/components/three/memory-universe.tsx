@@ -13,6 +13,7 @@ import {
   createNodeGlowMaterial,
   createPointGlowMaterial,
 } from './shaders'
+import { useInView } from '../../lib/hooks/use-in-view'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -271,25 +272,29 @@ export function MemoryScene() {
 }
 
 export default function MemoryUniverse() {
+  const { ref, inView } = useInView<HTMLDivElement>()
   return (
-    <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
-      camera={{ fov: 60, near: 0.1, far: 120, position: [0, 0, 15] }}
-      onCreated={({ gl }) => {
-        gl.setClearColor('#050510', 1)
-      }}
-    >
-      <fog attach="fog" args={['#050510', 9, 34]} />
-      <ambientLight intensity={0.35} />
-      <pointLight position={[8, 6, 8]} intensity={40} color="#9cc0ff" />
-      <pointLight position={[-8, -4, -6]} intensity={26} color="#7c3aed" />
-      <Suspense fallback={null}>
-        <MemoryScene />
-      </Suspense>
-      <EffectComposer>
-        <Bloom intensity={0.85} luminanceThreshold={0.2} luminanceSmoothing={0.6} mipmapBlur radius={0.7} />
-      </EffectComposer>
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas
+        dpr={[1, 2]}
+        gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
+        camera={{ fov: 60, near: 0.1, far: 120, position: [0, 0, 15] }}
+        frameloop={inView ? 'always' : 'never'}
+        onCreated={({ gl }) => {
+          gl.setClearColor('#050510', 1)
+        }}
+      >
+        <fog attach="fog" args={['#050510', 9, 34]} />
+        <ambientLight intensity={0.35} />
+        <pointLight position={[8, 6, 8]} intensity={40} color="#9cc0ff" />
+        <pointLight position={[-8, -4, -6]} intensity={26} color="#7c3aed" />
+        <Suspense fallback={null}>
+          <MemoryScene />
+        </Suspense>
+        <EffectComposer>
+          <Bloom intensity={0.85} luminanceThreshold={0.2} luminanceSmoothing={0.6} mipmapBlur radius={0.7} />
+        </EffectComposer>
+      </Canvas>
+    </div>
   )
 }
