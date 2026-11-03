@@ -191,8 +191,7 @@ export function createConnectionLineGeometry(
   nodes: THREE.Vector3[],
   options: { maxLinks?: number; range?: number; seed?: number } = {},
 ): THREE.BufferGeometry {
-  const { maxLinks = 3, range = 5, seed = 7 } = options
-  const rand = makeRandom(seed)
+  const { maxLinks = 3, range = 5 } = options
   const positions: number[] = []
   const progresses: number[] = []
 
