@@ -90,11 +90,14 @@ function MagneticButton({
 }
 
 function IntroLoader() {
-  const [done, setDone] = useState(false)
+  const reducedMotion = useReducedMotion()
+  const [done, setDone] = useState(() => reducedMotion)
+
   useEffect(() => {
+    if (reducedMotion) return
     const t = setTimeout(() => setDone(true), 1800)
     return () => clearTimeout(t)
-  }, [])
+  }, [reducedMotion])
 
   return (
     <AnimatePresence>
