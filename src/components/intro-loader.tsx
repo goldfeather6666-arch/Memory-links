@@ -6,13 +6,10 @@ import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 
 export default function IntroLoader() {
   const reducedMotion = useReducedMotion();
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => !reducedMotion);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setVisible(false);
-      return;
-    }
+    if (reducedMotion) return;
 
     const timer = window.setTimeout(() => setVisible(false), 1600);
     return () => window.clearTimeout(timer);
