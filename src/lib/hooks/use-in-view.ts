@@ -1,9 +1,12 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 export function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
-  const opts = { rootMargin: '0px 0px -12% 0px', threshold: 0, ...options };
+  const opts = useMemo(
+    () => ({ rootMargin: '0px 0px -12% 0px', threshold: 0, ...options }),
+    [options],
+  );
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
