@@ -100,7 +100,8 @@ void main() {
 `;
 
 function PulseLines() {
-  const { geometry, material } = useMemo(() => {
+  const materialRef = useRef<THREE.ShaderMaterial>(null!);
+  const geometry = useMemo(() => {
     const positions: number[] = [];
     const progress: number[] = [];
 
@@ -131,7 +132,7 @@ function PulseLines() {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
 
-    const material = new THREE.ShaderMaterial({
+    materialRef.current = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -145,28 +146,29 @@ function PulseLines() {
       fragmentShader: STREAM_FRAG,
     });
 
-    return { geometry, material };
+    return geometry;
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
+      materialRef.current.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    material.uniforms.uTime.value = clock.elapsedTime;
+    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <lineSegments geometry={geometry} material={material} />;
+  return <lineSegments geometry={geometry} material={materialRef.current} />;
 }
 
 function GlowingCore() {
-  const { geometry, material } = useMemo(() => {
+  const materialRef = useRef<THREE.ShaderMaterial>(null!);
+  const geometry = useMemo(() => {
     const geometry = new THREE.SphereGeometry(0.55, 48, 48);
-    const material = new THREE.ShaderMaterial({
+    materialRef.current = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -177,22 +179,22 @@ function GlowingCore() {
       vertexShader: CORE_VERT,
       fragmentShader: CORE_FRAG,
     });
-    return { geometry, material };
+    return geometry;
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
+      materialRef.current.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    material.uniforms.uTime.value = clock.elapsedTime;
+    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <mesh geometry={geometry} material={material} />;
+  return <mesh geometry={geometry} material={materialRef.current} />;
 }
 
 function DustField() {
@@ -353,12 +355,10 @@ function FloatingGlyphs() {
     });
   }, []);
 
-  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     groupRef.current.rotation.y += delta * 0.05;
   });
-  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={groupRef}>
@@ -373,11 +373,9 @@ function FloatingGlyphs() {
 
 function SceneContent() {
   const pivotRef = useRef<THREE.Group>(null);
-  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((_, delta) => {
     if (pivotRef.current) pivotRef.current.rotation.y += delta * 0.03;
   });
-  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={pivotRef}>
