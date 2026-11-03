@@ -8,7 +8,7 @@
  */
 
 import dynamic from 'next/dynamic';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState, useSyncExternalStore } from 'react';
 
 const KnowledgeGraph = dynamic(() => import('../three/knowledge-graph'), {
   ssr: false,
@@ -39,13 +39,12 @@ function StaticFallback() {
 }
 
 export default function KnowledgeGraphSection() {
-  const [webgl, setWebgl] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setWebgl(supportsWebGL());
-    setHydrated(true);
-  }, []);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const [webgl] = useState(() => supportsWebGL());
 
   return (
     <section id="knowledge-graph" className="kg-section" aria-labelledby="kg-title">
