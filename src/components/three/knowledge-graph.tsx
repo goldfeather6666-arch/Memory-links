@@ -19,7 +19,6 @@ import {
   useRef,
   useState,
   type ComponentRef,
-  type RefObject,
 } from 'react';
 import * as THREE from 'three';
 import {
@@ -28,6 +27,7 @@ import {
   EDGES,
   NODES,
 } from '../../lib/data/graph-data';
+import { useInView } from '../../lib/hooks/use-in-view';
 
 const NODE_COUNT = NODES.length;
 const EDGE_COUNT = EDGES.length;
@@ -397,40 +397,10 @@ function CameraRig({ selectedId }: { selectedId: number | null }) {
   );
 }
 
-/**
- * Local in-view hook. The shared `@/lib/hooks/use-in-view` module is not
- * present in this repo, so this component owns an equivalent implementation
- * (IntersectionObserver-backed) to drive `frameloop` so the WebGL loop only
- * runs while the graph is actually on screen.
- */
-function useInView<T extends HTMLElement>(ref: RefObject<T | null>): boolean {
-  const [inView, setInView] = useState(true);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setInView(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setInView(entry.isIntersecting);
-      },
-      { threshold: 0 },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [ref]);
-
-  return inView;
-}
-
 export default function KnowledgeGraph() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref);
+  const { ref, inView } = useInView<HTMLDivElement>();
 
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
