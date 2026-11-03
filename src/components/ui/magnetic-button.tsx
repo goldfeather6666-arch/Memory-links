@@ -4,7 +4,27 @@ import { useRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { motion, useSpring } from "motion/react";
 import { cn } from "@/utils/cn";
 
-type MagneticButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type MagneticButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  | "onAnimationStart"
+  | "onAnimationEnd"
+  | "onAnimationRepeat"
+  | "onDragStart"
+  | "onDrag"
+  | "onDragEnd"
+  | "onDragOver"
+  | "onDragEnter"
+  | "onDragLeave"
+  | "onPanStart"
+  | "onPan"
+  | "onPanEnd"
+  | "onPanSessionStart"
+  | "onTap"
+  | "onTapStart"
+  | "onTapCancel"
+  | "onHoverStart"
+  | "onHoverEnd"
+> & {
   children: ReactNode;
 };
 
