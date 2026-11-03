@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'motion/react'
+import { useReducedMotion } from '@/lib/hooks/use-reduced-motion'
 import { NebulaFallback, WebGLWrapper } from '../three/webgl-provider'
 
 const MemoryUniverse = dynamic(() => import('../three/memory-universe'), { ssr: false })
@@ -154,11 +155,7 @@ const line = {
 }
 
 export default function Hero() {
-  const [reducedMotion, setReducedMotion] = useState(false)
-
-  useEffect(() => {
-    setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  }, [])
+  const reducedMotion = useReducedMotion()
 
   return (
     <section
