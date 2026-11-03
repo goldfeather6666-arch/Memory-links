@@ -52,6 +52,7 @@ function buildStreams(): Vec3[][] {
 const STREAMS = buildStreams();
 
 const STREAM_VERT = /* glsl */ `
+attribute float aProgress;
 varying float vProgress;
 void main() {
   vProgress = aProgress;
