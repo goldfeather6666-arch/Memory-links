@@ -35,23 +35,29 @@ function SpinGroup({ children, speed = 0.08 }: { children: React.ReactNode; spee
 const CANVAS_STYLE = { width: '100%', height: '100%', display: 'block' } as const
 
 /** Cinematic floating timeline of event fragments. */
-export function EpisodicTimeline() {
+function TimelineScene() {
   const group = useRef<THREE.Group>(null)
   useFrame((state) => {
     if (group.current) group.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.15
   })
   const dots = useMemo(() => Array.from({ length: 12 }, (_, i) => i - 5.5), [])
   return (
+    <group ref={group}>
+      {dots.map((x) => (
+        <mesh key={x} position={[x * 0.6, 0, 0]}>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshBasicMaterial color="#9cc0ff" />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+export function EpisodicTimeline() {
+  return (
     <Canvas camera={{ position: [0, 0, 9], fov: 40 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
       <ambientLight intensity={1.2} />
-      <group ref={group}>
-        {dots.map((x) => (
-          <mesh key={x} position={[x * 0.6, 0, 0]}>
-            <sphereGeometry args={[0.12, 16, 16]} />
-            <meshBasicMaterial color="#9cc0ff" />
-          </mesh>
-        ))}
-      </group>
+      <TimelineScene />
     </Canvas>
   )
 }
@@ -92,7 +98,7 @@ export function SemanticNodes() {
 }
 
 /** Animated workflow pathway with a traveling highlight. */
-export function ProceduralPath() {
+function PathScene() {
   const nodes = useMemo(() => {
     const steps = 6
     const pts: number[] = []
@@ -116,21 +122,27 @@ export function ProceduralPath() {
     dot.current.position.set(x, y, 0)
   })
   return (
+    <SpinGroup speed={0.05}>
+      <LineNet pairs={nodes} color="#6f5bd6" />
+      {Array.from({ length: nodes.length / 3 }, (_, i) => (
+        <mesh key={i} position={[nodes[i * 3], nodes[i * 3 + 1], nodes[i * 3 + 2]]}>
+          <sphereGeometry args={[0.12, 12, 12]} />
+          <meshBasicMaterial color="#c8b8ff" />
+        </mesh>
+      ))}
+      <mesh ref={dot}>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.9} />
+      </mesh>
+    </SpinGroup>
+  )
+}
+
+export function ProceduralPath() {
+  return (
     <Canvas camera={{ position: [0, 0, 8], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true }} style={CANVAS_STYLE}>
       <ambientLight intensity={1.3} />
-      <SpinGroup speed={0.05}>
-        <LineNet pairs={nodes} color="#6f5bd6" />
-        {Array.from({ length: nodes.length / 3 }, (_, i) => (
-          <mesh key={i} position={[nodes[i * 3], nodes[i * 3 + 1], nodes[i * 3 + 2]]}>
-            <sphereGeometry args={[0.12, 12, 12]} />
-            <meshBasicMaterial color="#c8b8ff" />
-          </mesh>
-        ))}
-        <mesh ref={dot}>
-          <sphereGeometry args={[0.18, 16, 16]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.9} />
-        </mesh>
-      </SpinGroup>
+      <PathScene />
     </Canvas>
   )
 }
