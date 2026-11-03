@@ -9,7 +9,7 @@
  */
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
 type Vec3 = [number, number, number];
