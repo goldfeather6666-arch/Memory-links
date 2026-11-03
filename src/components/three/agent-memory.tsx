@@ -31,6 +31,7 @@ const AGENTS: AgentDef[] = [
 ];
 
 const PULSE_VERT = /* glsl */ `
+attribute float aProgress;
 varying float vProgress;
 void main() {
   vProgress = aProgress;
