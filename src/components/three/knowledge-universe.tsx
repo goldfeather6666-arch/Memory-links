@@ -42,9 +42,11 @@ function MemoryNodes() {
     }
   }, [positions, geometry, material])
 
+  /* eslint-disable react-hooks/immutability -- imperative shader uniform update in the frame loop. */
   useFrame((state) => {
     material.uniforms.uTime.value = state.clock.elapsedTime
   })
+  /* eslint-enable react-hooks/immutability */
 
   return <instancedMesh ref={mesh} args={[geometry, material, NODE_COUNT]} frustumCulled={false} />
 }
@@ -127,10 +129,12 @@ function ScrollPaths() {
     return () => st.kill()
   }, [])
 
+  /* eslint-disable react-hooks/immutability -- imperative shader uniform update in the frame loop. */
   useFrame((state) => {
     material.uniforms.uProgress.value = progress.current.value
     material.uniforms.uTime.value = state.clock.elapsedTime
   })
+  /* eslint-enable react-hooks/immutability */
 
   useEffect(() => () => {
     geometry.dispose()
