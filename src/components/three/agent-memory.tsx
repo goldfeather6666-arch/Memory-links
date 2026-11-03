@@ -164,6 +164,7 @@ function AgentNode({ agent }: { agent: AgentDef }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const origin = useMemo(() => new THREE.Vector3(...agent.position), [agent]);
 
+  /* eslint-disable react-hooks/immutability -- imperative THREE.Mesh transform update in the frame loop. */
   useFrame(({ clock }) => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -172,6 +173,7 @@ function AgentNode({ agent }: { agent: AgentDef }) {
     mesh.position.set(origin.x, origin.y + Math.sin(t * 0.8) * 0.12, origin.z);
     mesh.rotation.y += 0.004;
   });
+  /* eslint-enable react-hooks/immutability */
 
   return (
     <group>
@@ -200,9 +202,11 @@ function AgentNode({ agent }: { agent: AgentDef }) {
 
 function SceneContent() {
   const pivotRef = useRef<THREE.Group>(null);
+  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((_, delta) => {
     if (pivotRef.current) pivotRef.current.rotation.y += delta * 0.04;
   });
+  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={pivotRef}>
