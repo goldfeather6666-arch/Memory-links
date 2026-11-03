@@ -32,7 +32,6 @@ function Dust() {
     return { geometry, material }
   }, [])
 
-  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup; the compiler rule cannot track THREE.Object3D mutation. */
   useEffect(() => {
     const nodeField = createNodeField(DUST_COUNT, {
       radius: FIELD_RADIUS * 1.7,
@@ -54,7 +53,6 @@ function Dust() {
       material.dispose()
     }
   }, [geometry, material])
-  /* eslint-enable react-hooks/immutability */
 
   return <instancedMesh ref={mesh} args={[geometry, material, DUST_COUNT]} frustumCulled={false} />
 }
@@ -65,8 +63,13 @@ function Dust() {
 
 function LuminousNodes() {
   const mesh = useRef<THREE.InstancedMesh>(null!)
+  const materialRef = useRef<THREE.ShaderMaterial>(null!)
   const material = useMemo(
-    () => createNodeGlowMaterial({ base: '#1f5ac2', rim: '#aad4ff', power: 2.4, rimStrength: 0.9, alpha: 0.4 }),
+    () => {
+      const m = createNodeGlowMaterial({ base: '#1f5ac2', rim: '#aad4ff', power: 2.4, rimStrength: 0.9, alpha: 0.4 })
+      materialRef.current = m
+      return m
+    },
     [],
   )
   const geometry = useMemo(() => new THREE.SphereGeometry(0.24, 16, 16), [])
@@ -75,7 +78,6 @@ function LuminousNodes() {
     [],
   )
 
-  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup; the compiler rule cannot track THREE.Object3D mutation. */
   useEffect(() => {
     const dummy = new THREE.Object3D()
     for (let i = 0; i < NODE_COUNT; i++) {
@@ -89,13 +91,12 @@ function LuminousNodes() {
     mesh.current.instanceMatrix.needsUpdate = true
     return () => {
       geometry.dispose()
-      material.dispose()
+      materialRef.current.dispose()
     }
-  }, [positions, geometry, material])
-  /* eslint-enable react-hooks/immutability */
+  }, [positions, geometry])
 
   useFrame((state) => {
-    material.uniforms.uTime.value = state.clock.elapsedTime
+    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
   })
 
   return <instancedMesh ref={mesh} args={[geometry, material, NODE_COUNT]} frustumCulled={false} />
@@ -107,23 +108,24 @@ function LuminousNodes() {
 
 function Connections() {
   const ref = useRef<THREE.LineSegments>(null!)
-  const { geometry, material } = useMemo(() => {
+  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const geometry = useMemo(() => {
     const positions = createNodeField(NODE_COUNT, { radius: FIELD_RADIUS, seed: 11, yScale: 0.7 })
-    const geometry = createConnectionLineGeometry(positions, { maxLinks: 3, range: 5.2, seed: 31 })
-    const material = createFlowLineMaterial({ color: '#7fb0ff', speed: 0.14 })
-    return { geometry, material }
+    const g = createConnectionLineGeometry(positions, { maxLinks: 3, range: 5.2, seed: 31 })
+    materialRef.current = createFlowLineMaterial({ color: '#7fb0ff', speed: 0.14 })
+    return g
   }, [])
 
   useFrame((state) => {
-    material.uniforms.uTime.value = state.clock.elapsedTime
+    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
   })
 
   useEffect(() => () => {
     geometry.dispose()
-    material.dispose()
-  }, [geometry, material])
+    materialRef.current.dispose()
+  }, [geometry])
 
-  return <lineSegments ref={ref} geometry={geometry} material={material} />
+  return <lineSegments ref={ref} geometry={geometry} material={materialRef.current} />
 }
 
 /* ------------------------------------------------------------------ *
