@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --obsidian: #08090d;
+  --midnight: #101522;
+  --violet: #8767ff;
+  --neural-blue: #52b8ff;
+  --soft-white: #f5f4f0;
+  --champagne: #d9c39a;
+  --slate: #858a9a;
+
+  --background: var(--obsidian);
+  --foreground: var(--soft-white);
+}
+
+@theme inline {
+  --color-obsidian: var(--obsidian);
+  --color-midnight: var(--midnight);
+  --color-violet: var(--violet);
+  --color-neural-blue: var(--neural-blue);
+  --color-soft-white: var(--soft-white);
+  --color-champagne: var(--champagne);
+  --color-slate: var(--slate);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--violet);
+  color: var(--soft-white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.glass {
+  background-color: color-mix(in srgb, var(--soft-white) 5%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--soft-white) 12%, transparent);
+}
+
+.text-gradient {
+  background-image: linear-gradient(120deg, var(--violet), var(--neural-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section {
+  padding-block: clamp(4rem, 10vw, 7rem);
+  scroll-margin-top: 5rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
