@@ -78,7 +78,8 @@ void main() {
 `;
 
 function AgentLines() {
-  const { geometry, material } = useMemo(() => {
+  const materialRef = useRef<THREE.ShaderMaterial>(null!);
+  const geometry = useMemo(() => {
     const positions: number[] = [];
     const progress: number[] = [];
     const colors: number[] = [];
@@ -97,7 +98,7 @@ function AgentLines() {
     geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-    const material = new THREE.ShaderMaterial({
+    materialRef.current = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -110,28 +111,29 @@ function AgentLines() {
       fragmentShader: PULSE_FRAG,
     });
 
-    return { geometry, material };
+    return geometry;
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
+      materialRef.current.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    material.uniforms.uTime.value = clock.elapsedTime;
+    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <lineSegments geometry={geometry} material={material} />;
+  return <lineSegments geometry={geometry} material={materialRef.current} />;
 }
 
 function MemoryCore() {
-  const { geometry, material } = useMemo(() => {
+  const materialRef = useRef<THREE.ShaderMaterial>(null!);
+  const geometry = useMemo(() => {
     const geometry = new THREE.SphereGeometry(0.62, 48, 48);
-    const material = new THREE.ShaderMaterial({
+    materialRef.current = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -142,29 +144,28 @@ function MemoryCore() {
       vertexShader: CORE_VERT,
       fragmentShader: CORE_FRAG,
     });
-    return { geometry, material };
+    return geometry;
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
+      materialRef.current.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    material.uniforms.uTime.value = clock.elapsedTime;
+    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <mesh geometry={geometry} material={material} />;
+  return <mesh geometry={geometry} material={materialRef.current} />;
 }
 
 function AgentNode({ agent }: { agent: AgentDef }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const origin = useMemo(() => new THREE.Vector3(...agent.position), [agent]);
 
-  /* eslint-disable react-hooks/immutability -- imperative THREE.Mesh transform update in the frame loop. */
   useFrame(({ clock }) => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -173,7 +174,6 @@ function AgentNode({ agent }: { agent: AgentDef }) {
     mesh.position.set(origin.x, origin.y + Math.sin(t * 0.8) * 0.12, origin.z);
     mesh.rotation.y += 0.004;
   });
-  /* eslint-enable react-hooks/immutability */
 
   return (
     <group>
@@ -202,11 +202,9 @@ function AgentNode({ agent }: { agent: AgentDef }) {
 
 function SceneContent() {
   const pivotRef = useRef<THREE.Group>(null);
-  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((_, delta) => {
     if (pivotRef.current) pivotRef.current.rotation.y += delta * 0.04;
   });
-  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={pivotRef}>
