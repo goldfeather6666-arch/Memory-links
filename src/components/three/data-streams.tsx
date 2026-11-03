@@ -353,10 +353,12 @@ function FloatingGlyphs() {
     });
   }, []);
 
+  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     groupRef.current.rotation.y += delta * 0.05;
   });
+  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={groupRef}>
@@ -371,9 +373,11 @@ function FloatingGlyphs() {
 
 function SceneContent() {
   const pivotRef = useRef<THREE.Group>(null);
+  /* eslint-disable react-hooks/immutability -- imperative group rotation in the frame loop. */
   useFrame((_, delta) => {
     if (pivotRef.current) pivotRef.current.rotation.y += delta * 0.03;
   });
+  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={pivotRef}>
