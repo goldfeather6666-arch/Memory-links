@@ -32,6 +32,7 @@ function Dust() {
     return { geometry, material }
   }, [])
 
+  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup; the compiler rule cannot track THREE.Object3D mutation. */
   useEffect(() => {
     const nodeField = createNodeField(DUST_COUNT, {
       radius: FIELD_RADIUS * 1.7,
@@ -53,6 +54,7 @@ function Dust() {
       material.dispose()
     }
   }, [geometry, material])
+  /* eslint-enable react-hooks/immutability */
 
   return <instancedMesh ref={mesh} args={[geometry, material, DUST_COUNT]} frustumCulled={false} />
 }
@@ -73,6 +75,7 @@ function LuminousNodes() {
     [],
   )
 
+  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup; the compiler rule cannot track THREE.Object3D mutation. */
   useEffect(() => {
     const dummy = new THREE.Object3D()
     for (let i = 0; i < NODE_COUNT; i++) {
@@ -89,6 +92,7 @@ function LuminousNodes() {
       material.dispose()
     }
   }, [positions, geometry, material])
+  /* eslint-enable react-hooks/immutability */
 
   useFrame((state) => {
     material.uniforms.uTime.value = state.clock.elapsedTime
