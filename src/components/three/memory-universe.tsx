@@ -61,17 +61,18 @@ function Dust() {
  * Luminous nodes — instanced additive-glow spheres (rim fresnel).
  * ------------------------------------------------------------------ */
 
+const NODE_GLOW_MATERIAL = createNodeGlowMaterial({
+  base: '#1f5ac2',
+  rim: '#aad4ff',
+  power: 2.4,
+  rimStrength: 0.9,
+  alpha: 0.4,
+})
+
+const FLOW_LINE_MATERIAL = createFlowLineMaterial({ color: '#7fb0ff', speed: 0.14 })
+
 function LuminousNodes() {
   const mesh = useRef<THREE.InstancedMesh>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
-  const material = useMemo(
-    () => {
-      const m = createNodeGlowMaterial({ base: '#1f5ac2', rim: '#aad4ff', power: 2.4, rimStrength: 0.9, alpha: 0.4 })
-      materialRef.current = m
-      return m
-    },
-    [],
-  )
   const geometry = useMemo(() => new THREE.SphereGeometry(0.24, 16, 16), [])
   const positions = useMemo(
     () => createNodeField(NODE_COUNT, { radius: FIELD_RADIUS, seed: 11, yScale: 0.7 }),
@@ -91,15 +92,14 @@ function LuminousNodes() {
     mesh.current.instanceMatrix.needsUpdate = true
     return () => {
       geometry.dispose()
-      materialRef.current.dispose()
     }
   }, [positions, geometry])
 
   useFrame((state) => {
-    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
+    NODE_GLOW_MATERIAL.uniforms.uTime.value = state.clock.elapsedTime
   })
 
-  return <instancedMesh ref={mesh} args={[geometry, material, NODE_COUNT]} frustumCulled={false} />
+  return <instancedMesh ref={mesh} args={[geometry, NODE_GLOW_MATERIAL, NODE_COUNT]} frustumCulled={false} />
 }
 
 /* ------------------------------------------------------------------ *
@@ -108,24 +108,20 @@ function LuminousNodes() {
 
 function Connections() {
   const ref = useRef<THREE.LineSegments>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
   const geometry = useMemo(() => {
     const positions = createNodeField(NODE_COUNT, { radius: FIELD_RADIUS, seed: 11, yScale: 0.7 })
-    const g = createConnectionLineGeometry(positions, { maxLinks: 3, range: 5.2, seed: 31 })
-    materialRef.current = createFlowLineMaterial({ color: '#7fb0ff', speed: 0.14 })
-    return g
+    return createConnectionLineGeometry(positions, { maxLinks: 3, range: 5.2, seed: 31 })
   }, [])
 
   useFrame((state) => {
-    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
+    FLOW_LINE_MATERIAL.uniforms.uTime.value = state.clock.elapsedTime
   })
 
   useEffect(() => () => {
     geometry.dispose()
-    materialRef.current.dispose()
   }, [geometry])
 
-  return <lineSegments ref={ref} geometry={geometry} material={materialRef.current} />
+  return <lineSegments ref={ref} geometry={geometry} material={FLOW_LINE_MATERIAL} />
 }
 
 /* ------------------------------------------------------------------ *
