@@ -8,6 +8,9 @@ type ClassValue =
   | { [key: string]: boolean | null | undefined };
 
 function resolveClassValue(value: ClassValue): string {
+  if (!value) {
+    return "";
+  }
   if (typeof value === "string" || typeof value === "number") {
     return String(value);
   }
