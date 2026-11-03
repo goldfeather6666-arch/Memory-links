@@ -89,13 +89,15 @@ export const NODE_GLOW_FRAGMENT = `
   uniform float uPower;
   uniform float uRimStrength;
   uniform float uAlpha;
+  uniform float uTime;
   varying vec3 vNormal;
   varying vec3 vView;
   void main() {
     float rim = 1.0 - abs(dot(normalize(vNormal), normalize(vView)));
     rim = pow(rim, uPower);
-    vec3 col = mix(uBase, uRim, rim);
-    float a = uAlpha + rim * uRimStrength;
+    float breathe = 1.0 + 0.06 * sin(uTime * 1.6 + rim * 6.0);
+    vec3 col = mix(uBase, uRim, rim) * breathe;
+    float a = (uAlpha + rim * uRimStrength) * breathe;
     gl_FragColor = vec4(col, a);
   }
 `
@@ -116,6 +118,7 @@ export function createNodeGlowMaterial(params: NodeGlowParams = {}): THREE.Shade
       uPower: { value: params.power ?? 2.5 },
       uRimStrength: { value: params.rimStrength ?? 0.85 },
       uAlpha: { value: params.alpha ?? 0.35 },
+      uTime: { value: 0 },
     },
     vertexShader: NODE_GLOW_VERTEX,
     fragmentShader: NODE_GLOW_FRAGMENT,
