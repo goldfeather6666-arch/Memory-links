@@ -99,9 +99,34 @@ void main() {
 }
 `;
 
+const STREAM_MATERIAL = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  uniforms: {
+    uTime: { value: 0 },
+    uBaseColor: { value: new THREE.Color('#7c92ff') },
+    uBrightColor: { value: new THREE.Color('#cfe0ff') },
+    uOpacity: { value: 0.9 },
+  },
+  vertexShader: STREAM_VERT,
+  fragmentShader: STREAM_FRAG,
+});
+
+const CORE_MATERIAL = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  uniforms: {
+    uColor: { value: new THREE.Color('#8b7bff') },
+    uTime: { value: 0 },
+  },
+  vertexShader: CORE_VERT,
+  fragmentShader: CORE_FRAG,
+});
+
 function PulseLines() {
-  const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const { geometry, material } = useMemo(() => {
+  const geometry = useMemo(() => {
     const positions: number[] = [];
     const progress: number[] = [];
 
@@ -132,71 +157,38 @@ function PulseLines() {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
 
-    const material = new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      uniforms: {
-        uTime: { value: 0 },
-        uBaseColor: { value: new THREE.Color('#7c92ff') },
-        uBrightColor: { value: new THREE.Color('#cfe0ff') },
-        uOpacity: { value: 0.9 },
-      },
-      vertexShader: STREAM_VERT,
-      fragmentShader: STREAM_FRAG,
-    });
-    materialRef.current = material;
-
-    return { geometry, material };
+    return geometry;
   }, []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
+    STREAM_MATERIAL.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <lineSegments geometry={geometry} material={material} />;
+  return <lineSegments geometry={geometry} material={STREAM_MATERIAL} />;
 }
 
 function GlowingCore() {
-  const materialRef = useRef<THREE.ShaderMaterial>(null!);
-  const { geometry, material } = useMemo(() => {
-    const geometry = new THREE.SphereGeometry(0.55, 48, 48);
-    const material = new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      uniforms: {
-        uColor: { value: new THREE.Color('#8b7bff') },
-        uTime: { value: 0 },
-      },
-      vertexShader: CORE_VERT,
-      fragmentShader: CORE_FRAG,
-    });
-    materialRef.current = material;
-    return { geometry, material };
-  }, []);
+  const geometry = useMemo(() => new THREE.SphereGeometry(0.55, 48, 48), []);
 
   useEffect(
     () => () => {
       geometry.dispose();
-      material.dispose();
     },
-    [geometry, material],
+    [geometry],
   );
 
   useFrame(({ clock }) => {
-    materialRef.current.uniforms.uTime.value = clock.elapsedTime;
+    CORE_MATERIAL.uniforms.uTime.value = clock.elapsedTime;
   });
 
-  return <mesh geometry={geometry} material={material} />;
+  return <mesh geometry={geometry} material={CORE_MATERIAL} />;
 }
 
 function DustField() {
