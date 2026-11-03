@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { createNodeField, createNodeGlowMaterial, makeRandom } from './shaders'
+import { useInView } from '../../lib/hooks/use-in-view'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -262,29 +263,33 @@ interface KnowledgeUniverseProps {
 }
 
 export default function KnowledgeUniverse({ children }: KnowledgeUniverseProps) {
+  const { ref, inView } = useInView<HTMLDivElement>()
   return (
-    <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
-      camera={{ fov: 55, near: 0.1, far: 100, position: [0, 0.5, 13] }}
-      onCreated={({ gl }) => gl.setClearColor('#070714', 1)}
-    >
-      <fog attach="fog" args={['#070714', 8, 30]} />
-      <ambientLight intensity={0.4} />
-      <pointLight position={[6, 6, 6]} intensity={30} color="#8f6cff" />
-      <pointLight position={[-6, -3, -5]} intensity={20} color="#3aa0ff" />
-      <Suspense fallback={null}>
-        <Rig>
-          <MemoryNodes />
-          <ScrollPaths />
-          <Timeline />
-          <Documents />
-          {children}
-        </Rig>
-      </Suspense>
-      <EffectComposer>
-        <Bloom intensity={0.7} luminanceThreshold={0.25} luminanceSmoothing={0.7} mipmapBlur radius={0.7} />
-      </EffectComposer>
-    </Canvas>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <Canvas
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
+        camera={{ fov: 55, near: 0.1, far: 100, position: [0, 0.5, 13] }}
+        frameloop={inView ? 'always' : 'never'}
+        onCreated={({ gl }) => gl.setClearColor('#070714', 1)}
+      >
+        <fog attach="fog" args={['#070714', 8, 30]} />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[6, 6, 6]} intensity={30} color="#8f6cff" />
+        <pointLight position={[-6, -3, -5]} intensity={20} color="#3aa0ff" />
+        <Suspense fallback={null}>
+          <Rig>
+            <MemoryNodes />
+            <ScrollPaths />
+            <Timeline />
+            <Documents />
+            {children}
+          </Rig>
+        </Suspense>
+        <EffectComposer>
+          <Bloom intensity={0.7} luminanceThreshold={0.25} luminanceSmoothing={0.7} mipmapBlur radius={0.7} />
+        </EffectComposer>
+      </Canvas>
+    </div>
   )
 }
