@@ -6,6 +6,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   bearerAuth,
   fetchJson,
@@ -20,7 +21,7 @@ import type {
 
 const GITLAB_API = "https://gitlab.com/api/v4";
 
-function toProjectSource(project: Record<string, unknown>): NormalizedSource {
+function toProjectSource(project: Record<string, unknown>): RawSource {
   return {
     externalId: typeof project.id === "number" ? String(project.id) : String(project.id ?? ""),
     recordType: "project",
