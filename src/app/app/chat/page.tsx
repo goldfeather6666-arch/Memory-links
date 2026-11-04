@@ -2,6 +2,7 @@ import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
 import { listConversations } from "@/server/conversations/data";
 import { ChatApp } from "@/components/app/chat/chat-app";
+import type { ConversationRecord } from "@/server/conversations/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function ChatPage() {
   const workspaces = await listWorkspacesForUser(session.id);
   if (workspaces.length === 0) return null;
   const workspaceId = workspaces[0].workspace.id;
-  let initialConversations: unknown[] = [];
+  let initialConversations: ConversationRecord[] = [];
   try {
     const result = await listConversations(session.id, workspaceId, {
       status: "active",
