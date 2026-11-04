@@ -47,7 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {children}
     </button>
   );
-}
+});
 
 export function Spinner({ className }: { className?: string }) {
   return (
