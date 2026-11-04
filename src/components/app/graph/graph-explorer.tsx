@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/app/icons";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { useWebGL } from "@/components/three/webgl-provider";
+import { detectWebGL } from "@/components/three/webgl-provider";
 import { Graph2D } from "./graph-2d";
 import { Universe3D } from "./universe-3d";
 import { NodeDetail } from "./node-detail";
@@ -63,7 +63,9 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProps) {
   const reducedMotion = useReducedMotion();
-  const webgl = useWebGL();
+  const [webgl] = useState(() =>
+    typeof window === "undefined" ? true : detectWebGL(),
+  );
 
   const [mode, setMode] = useState<Mode>("universe");
   const [topic, setTopic] = useState("");
