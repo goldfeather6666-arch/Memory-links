@@ -47,6 +47,8 @@ export interface MessageRecord {
   content: string;
   tokens: number | null;
   evidence: EvidenceRef[];
+  /** Retrieval context that grounded this message (projects/entities/timeline). */
+  context: Record<string, unknown>;
   status: MessageStatus;
   error: string | null;
   clientRequestId: string | null;
