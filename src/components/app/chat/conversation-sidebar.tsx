@@ -8,13 +8,12 @@ import type { ChatConversation } from "./types";
 interface Props {
   conversations: ChatConversation[];
   activeId: string | null;
-  workspaceId: string;
   onSelect: (id: string) => void;
   onNew: () => void;
   onDeleted: () => void;
 }
 
-export function ConversationSidebar({ conversations, activeId, onSelect, onNew, onDeleted, workspaceId }: Props) {
+export function ConversationSidebar({ conversations, activeId, onSelect, onNew, onDeleted }: Props) {
   const [q, setQ] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const filtered = conversations.filter((c) => {
