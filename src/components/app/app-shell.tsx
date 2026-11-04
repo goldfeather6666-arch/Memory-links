@@ -6,7 +6,6 @@ import Link from "next/link";
 import { APP_NAV } from "@/lib/app-nav";
 import { Icon } from "@/components/app/icons";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
 
 interface AppShellProps {
