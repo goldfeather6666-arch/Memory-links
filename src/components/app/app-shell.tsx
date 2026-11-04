@@ -48,7 +48,7 @@ export function AppShell({ session, children }: AppShellProps) {
           key={item.href}
           href={item.href}
           onClick={() => setDrawerOpen(false)}
-          aria-current=isActive(item.href) ? "page" : undefined}
+          aria-current={isActive(item.href) ? "page" : undefined}
           className={cn(
             "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
             isActive(item.href)
