@@ -11,6 +11,7 @@ import {
   ProviderHttpError,
   bearerAuth,
   coerceTimestamp,
+  fetchJson,
   pageLimit,
 } from "./types";
 import type {
@@ -18,6 +19,7 @@ import type {
   ConnectorAdapter,
   FetchPageParams,
   FetchPageResult,
+  RawSource,
 } from "./types";
 
 const LINEAR_API = "https://api.linear.app/graphql";
@@ -63,7 +65,7 @@ async function graphqlRequest<T>(
   return data.data;
 }
 
-function toIssueSource(issue: Record<string, unknown>): NormalizedSource {
+function toIssueSource(issue: Record<string, unknown>): RawSource {
   return {
     externalId: typeof issue.id === "string" ? issue.id : String(issue.id ?? ""),
     recordType: "issue",
