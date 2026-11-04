@@ -72,7 +72,9 @@ export function selectModel(
     if (picked) return { config: picked, escalated: false };
   }
   const base = getModelConfig();
-  if (task.requiresDeepReasoning || task.inputTokens > base.small === base.large ? base.maxInputTokens : base.maxInputTokens) {
+  const escalate =
+    Boolean(task.requiresDeepReasoning) || task.inputTokens > base.maxInputTokens;
+  if (escalate) {
     const large = MODELS.find((m) => m.large !== base.small) ?? base;
     return { config: large, escalated: true };
   }
