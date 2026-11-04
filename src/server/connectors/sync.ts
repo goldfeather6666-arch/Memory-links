@@ -13,9 +13,11 @@ import { getAccessToken } from "@/server/connectors/oauth";
 import { getConnectorAdapter } from "@/server/connectors/clients";
 import { processBatch } from "@/server/connectors/pipeline";
 import { isRetryableError } from "@/server/memory/errors";
+import type { RawSource } from "@/server/connectors/clients/types";
 import type {
   ConnectionRecord,
   ConnectionStatus,
+  NormalizedSource,
   SyncResult,
 } from "@/server/connectors/types";
 
@@ -24,6 +26,8 @@ const STATUS_CONNECTED: ConnectionStatus = "connected";
 const STATUS_PAUSED: ConnectionStatus = "paused";
 const STATUS_FAILED: ConnectionStatus = "failed";
 const STATUS_SYNCING: ConnectionStatus = "syncing";
+
+type SyncTrigger = "manual" | "scheduled" | "webhook" | "initial";
 
 const EMPTY_RESULT: SyncResult = {
   discovered: 0,
@@ -42,7 +46,39 @@ function addResults(dst: SyncResult, src: SyncResult): void {
   if (src.error) dst.error = src.error;
 }
 
-async function insertSyncRun(userId, connection, trigger) {
+/**
+ * Adapters return context-free RawSource records; the sync engine injects the
+ * provider/connection/workspace context before handing sources to the
+ * pipeline so every imported record is attributed to the right connection.
+ */
+function withContext(
+  raw: RawSource,
+  connection: ConnectionRecord,
+): NormalizedSource {
+  return {
+    provider: connection.provider,
+    connectionId: connection.id,
+    workspaceId: connection.workspaceId,
+    externalId: raw.externalId,
+    recordType: raw.recordType,
+    title: raw.title ?? null,
+    content: raw.content ?? null,
+    author: raw.author ?? null,
+    timestamp: raw.timestamp ?? null,
+    modifiedAt: raw.modifiedAt ?? null,
+    url: raw.url ?? null,
+    parentId: raw.parentId ?? null,
+    threadId: raw.threadId ?? null,
+    fileMeta: raw.fileMeta ?? null,
+    metadata: raw.metadata ?? {},
+  };
+}
+
+async function insertSyncRun(
+  userId: string,
+  connection: ConnectionRecord,
+  trigger: SyncTrigger,
+): Promise<string> {
   const rows = await queryTenant<{ id: string }>(
     userId,
     `INSERT INTO sync_runs (connection_id, workspace_id, owner_id, trigger, status, started_at)
@@ -53,7 +89,14 @@ async function insertSyncRun(userId, connection, trigger) {
   return rows[0].id;
 }
 
-async function finalizeSyncRun(userId, runId, status, result, nextRunAt, error) {
+async function finalizeSyncRun(
+  userId: string,
+  runId: string,
+  status: string,
+  result: SyncResult,
+  nextRunAt: string | null,
+  error: string | null,
+): Promise<void> {
   await queryTenant(
     userId,
     `UPDATE sync_runs
@@ -67,16 +110,31 @@ async function finalizeSyncRun(userId, runId, status, result, nextRunAt, error) 
             error = $9,
             finished_at = now()
       WHERE id = $1`,
-    [runId, status, result.discovered, result.imported, result.updated, result.skipped, result.failed, nextRunAt, error ?? null],
+    [
+      runId,
+      status,
+      result.discovered,
+      result.imported,
+      result.updated,
+      result.skipped,
+      result.failed,
+      nextRunAt,
+      error,
+    ],
   );
 }
 
-function computeNextRunAt(connection, now) {
+function computeNextRunAt(connection: ConnectionRecord, now: Date): string | null {
   if (!connection.syncIntervalMin || connection.syncIntervalMin <= 0) return null;
   return new Date(now.getTime() + connection.syncIntervalMin * 60_000).toISOString();
 }
 
-async function persistSyncMeta(userId, workspaceId, connectionId, nextRunAt) {
+async function persistSyncMeta(
+  userId: string,
+  workspaceId: string,
+  connectionId: string,
+  nextRunAt: string | null,
+): Promise<void> {
   await queryTenant(
     userId,
     `UPDATE connections SET last_sync_at = now(), next_sync_at = $3
@@ -93,7 +151,7 @@ export async function runSync(
   userId: string,
   workspaceId: string,
   connectionId: string,
-  trigger: "manual" | "scheduled" | "webhook" | "initial",
+  trigger: SyncTrigger,
 ): Promise<SyncResult> {
   if (!(await userHasWorkspaceAccess(userId, workspaceId))) {
     throw new Error("FORBIDDEN");
@@ -129,7 +187,8 @@ export async function runSync(
           ? adapter.fetchChanges.bind(adapter)
           : adapter.fetchInitial.bind(adapter);
       const res = await fetch({ accessToken, cursor: cursor ?? undefined });
-      const pageResult = await processBatch(userId, connection, res.items);
+      const sources = res.items.map((raw) => withContext(raw, connection));
+      const pageResult = await processBatch(userId, connection, sources);
       addResults(result, pageResult);
       cursor = res.nextCursor ?? null;
       if (!cursor || res.items.length === 0) break;
@@ -154,11 +213,15 @@ export async function runSync(
   }
 }
 
-export async function runInitialSync(userId, workspaceId, connectionId) {
+export async function runInitialSync(
+  userId: string,
+  workspaceId: string,
+  connectionId: string,
+): Promise<SyncResult> {
   return runSync(userId, workspaceId, connectionId, "initial");
 }
 
-export function shouldRunScheduled(connection, now) {
+export function shouldRunScheduled(connection: ConnectionRecord, now: Date): boolean {
   if (!connection.syncIntervalMin || connection.syncIntervalMin <= 0) return false;
   if (!connection.nextSyncAt) return true;
   return new Date(connection.nextSyncAt).getTime() <= now.getTime();
