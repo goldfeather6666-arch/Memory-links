@@ -194,6 +194,9 @@ export function ChatApp({
     }
   }, [api, workspaceId]);
 
+  // Load initial data on mount. Both loaders are async — setState runs only
+  // after the network call resolves, so it is never a synchronous render update.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     void loadSettings();
     void loadConversations();
