@@ -1,6 +1,6 @@
 import { queryTenant } from "@/db/client";
 import { getServerEnv } from "@/lib/env";
-import { projectGraph } from "@/server/intelligence/graph";
+import { projectGraph, type GraphNode } from "@/server/intelligence/graph";
 import { recallMemories } from "@/server/memory/retrieval";
 import type { AgentPrincipal } from "./types";
 import { readPermissionSet } from "./permissions";
@@ -76,7 +76,7 @@ export async function buildContextPackage(
     importance: Number(it.importance ?? 0),
     validFrom: it.validFrom ? String(it.validFrom) : null,
     validUntil: it.validUntil ? String(it.validUntil) : null,
-    occurredAt: it.occurredAt ? String(it.occurredAt) : null,
+    occurredAt: it.validFrom ? String(it.validFrom) : String(it.createdAt),
     sourceRef: it.sourceRef ? String(it.sourceRef) : null,
     relevance: it.relevance != null ? Number(it.relevance) : null,
   }));
@@ -94,11 +94,11 @@ export async function buildContextPackage(
         limitEdges: 160,
       });
       const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
-      entities = nodes.slice(0, 60).map((n: Record<string, unknown>) => ({
-        id: String(n.id ?? ""),
-        label: String(n.label ?? n.name ?? ""),
-        type: String(n.type ?? "entity"),
-        confidence: n.confidence != null ? Number(n.confidence) : null,
+      entities = nodes.slice(0, 60).map((n: GraphNode) => ({
+        id: n.id,
+        label: n.label,
+        type: n.type,
+        confidence: n.confidence,
       }));
     } catch {
       entities = [];
