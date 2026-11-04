@@ -1,98 +1,73 @@
-import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
-import { queryTenant } from "@/db/client";
+import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
 import type { User } from "@/db/schema";
-import { getServerEnv } from "@/lib/env";
-import { SESSION_COOKIE } from "@/server/auth/constants";
-
-function sha256(input: string): string {
-  return createHash("sha256").update(input).digest("hex");
-}
-
-export function generateToken(): string {
-  return randomBytes(32).toString("base64url");
-}
 
 export interface SessionUser extends User {
   sessionId: string;
 }
 
 /**
- * Create a session for a user, returning the raw (opaque) token that should
- * be placed in the cookie. Only the SHA-256 hash is persisted.
+ * Resolve the current authenticated user from the Supabase Auth session.
+ *
+ * This is the single session authority for the app. It reads the Supabase SSR
+ * cookie bag (set at sign-in/sign-up and refreshed by the proxy) and returns
+ * the user profile. No legacy DB session lookup is performed, so auth works
+ * even when DATABASE_URL is not configured.
  */
-export async function createSession(userId: string): Promise<string> {
-  const token = generateToken();
-  const tokenHash = sha256(token);
-  const ttlDays = getServerEnv().SESSION_TTL_DAYS;
-  await queryTenant(userId, `INSERT INTO sessions (user_id, token_hash, expires_at)
-    VALUES ($1, $2, now() + make_interval(days => $3))`, [
-    userId,
-    tokenHash,
-    ttlDays,
-  ]);
-  return token;
-}
-
-async function sessionByToken(token: string): Promise<SessionUser | null> {
-  const tokenHash = sha256(token);
-  const rows = await queryTenant(
-    null,
-    `SELECT s.id AS session_id, u.id, u.email, u.display_name, u.avatar_url,
-            u.email_verified, u.created_at, u.updated_at
-       FROM sessions s
-       JOIN users u ON u.id = s.user_id
-      WHERE s.token_hash = $1 AND s.expires_at > now()
-      LIMIT 1`,
-    [tokenHash],
-  );
-  if (rows.length === 0) return null;
-  const r = rows[0];
-  return {
-    sessionId: r.session_id,
-    id: r.id,
-    email: r.email,
-    displayName: r.display_name,
-    avatarUrl: r.avatar_url,
-    emailVerified: r.email_verified,
-    createdAt: String(r.created_at),
-    updatedAt: String(r.updated_at),
-  };
-}
-
-/** Read the current session from the request cookie. */
 export async function getCurrentSession(): Promise<SessionUser | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-  return sessionByToken(token);
-}
-
-/** Touch last_seen_at (best-effort). */
-export async function touchSession(sessionId: string): Promise<void> {
   try {
-    await queryTenant(null, `UPDATE sessions SET last_seen_at = now() WHERE id = $1`, [sessionId]);
+    const sb = await createServerSupabaseClientAsync();
+    const {
+      data: { user },
+      error,
+    } = await sb.auth.getUser();
+    if (error || !user) return null;
+
+    const displayName =
+      (user.user_metadata?.display_name as string | undefined) ??
+      (user.user_metadata?.name as string | undefined) ??
+      null;
+    const avatarUrl =
+      (user.user_metadata?.avatar_url as string | undefined) ?? null;
+
+    return {
+      sessionId: user.id,
+      id: user.id,
+      email: user.email ?? "",
+      displayName,
+      avatarUrl,
+      emailVerified: Boolean(user.email_confirmed_at),
+      createdAt: user.created_at ?? "",
+      updatedAt: user.updated_at ?? user.last_sign_in_at ?? "",
+    };
   } catch {
-    // non-fatal
+    return null;
   }
 }
 
-export async function destroySession(token: string | undefined): Promise<void> {
-  if (!token) return;
-  const tokenHash = sha256(token);
-  await queryTenant(null, `DELETE FROM sessions WHERE token_hash = $1`, [tokenHash]);
+/** Touch/renew is delegated to Supabase token refresh; best-effort no-op. */
+export async function touchSession(_sessionId: string): Promise<void> {
+  // Supabase refreshes the SSR session token automatically; nothing to persist.
 }
 
-/** Destroy every session belonging to a user (e.g. on password reset). */
-export async function destroySessionsForUser(userId: string): Promise<void> {
-  await queryTenant(null, `DELETE FROM sessions WHERE user_id = $1`, [userId]);
+/** Clear the Supabase session cookie (server-side sign-out). */
+export async function destroySession(): Promise<void> {
+  try {
+    const sb = await createServerSupabaseClientAsync();
+    await sb.auth.signOut();
+  } catch {
+    // ignore — cookie clearing also happens client-side
+  }
 }
 
-export interface SessionRow {
-  id: string;
-  userId: string;
-  tokenHash: string;
-  expiresAt: string;
-  createdAt: string;
-  lastSeenAt: string | null;
+/** Sign out every session for a user via Supabase (all device sessions). */
+export async function destroySessionsForUser(_userId: string): Promise<void> {
+  try {
+    const sb = await createServerSupabaseClientAsync();
+    await sb.auth.signOut({ scope: "global" });
+  } catch {
+    // best-effort
+  }
 }
+
+export const SESSION_COOKIE = "sb-auth-token";
