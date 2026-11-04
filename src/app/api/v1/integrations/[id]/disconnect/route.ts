@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
-import { disconnectConnection } from "@/server/connectors/connections";
+import { disconnectConnection, getConnection } from "@/server/connectors/connections";
 
 /**
  * POST /api/v1/integrations/:id/disconnect?ws=<workspaceId>
@@ -25,10 +25,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const workspaceId = selected.workspace.id;
 
   try {
-    const ok = await disconnectConnection(session.id, workspaceId, id);
-    if (!ok) {
+    const existing = await getConnection(session.id, workspaceId, id);
+    if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+    await disconnectConnection(session.id, workspaceId, id);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
