@@ -2,15 +2,7 @@ import { NextResponse } from "next/server";
 import { signup } from "@/server/auth/service";
 import { signupSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
-import { isDatabaseConfigured } from "@/lib/env";
-
-function emailFromBody(body: unknown): string | null {
-  if (typeof body !== "object" || body === null) return null;
-  const record = body as Record<string, unknown>;
-  return typeof record.email === "string" && record.email.trim()
-    ? record.email.trim().toLowerCase()
-    : null;
-}
+import { isSupabaseConfigured } from "@/lib/env";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -20,14 +12,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  if (!isDatabaseConfigured()) {
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Sign-up isn't configured for this environment yet." },
       { status: 503 },
     );
   }
 
-  const key = emailFromBody(body) ?? getClientRequestIp(req);
+  const key = getClientRequestIp(req);
   const rl = await checkAuthRateLimit(key, "signup");
   if (!rl.allowed) {
     return NextResponse.json(
@@ -48,31 +40,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: first }, { status: 400 });
   }
 
-  try {
-    const { user, emailSent } = await signup(parsed.data);
+  const result = await signup(parsed.data);
+  if (!result.ok) {
     return NextResponse.json(
-      {
-        ok: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          displayName: user.displayName,
-        },
-        emailSent,
-      },
-      { status: 201 },
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "";
-    if (message.includes("duplicate key")) {
-      return NextResponse.json(
-        { error: "An account with this email already exists." },
-        { status: 409 },
-      );
-    }
-    return NextResponse.json(
-      { error: "Unable to create the account. Please try again." },
-      { status: 500 },
+      { error: result.error ?? "Could not create account." },
+      { status: 400 },
     );
   }
+
+  if (result.sessionCreated) {
+    return NextResponse.json({ ok: true, sessionCreated: true, user: result.user });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    sessionCreated: false,
+    message: "Account created. Confirm your email to sign in.",
+  });
 }

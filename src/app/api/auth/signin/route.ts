@@ -1,18 +1,8 @@
 import { NextResponse } from "next/server";
 import { signin } from "@/server/auth/service";
-import { createSession } from "@/server/auth/session";
-import { SESSION_COOKIE } from "@/server/auth/constants";
 import { signinSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
-import { getServerEnv, isDatabaseConfigured } from "@/lib/env";
-
-function emailFromBody(body: unknown): string | null {
-  if (typeof body !== "object" || body === null) return null;
-  const record = body as Record<string, unknown>;
-  return typeof record.email === "string" && record.email.trim()
-    ? record.email.trim().toLowerCase()
-    : null;
-}
+import { isSupabaseConfigured } from "@/lib/env";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -22,14 +12,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  if (!isDatabaseConfigured()) {
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Sign-in isn't configured for this environment yet." },
       { status: 503 },
     );
   }
 
-  const key = emailFromBody(body) ?? getClientRequestIp(req);
+  const key = getClientRequestIp(req);
   const rl = await checkAuthRateLimit(key, "signin");
   if (!rl.allowed) {
     return NextResponse.json(
@@ -50,29 +40,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: first }, { status: 400 });
   }
 
-  const { user, error } = await signin(parsed.data.email, parsed.data.password);
-  if (!user || error) {
-    return NextResponse.json({ error: error ?? "Unable to sign in." }, { status: 401 });
+  const result = await signin(parsed.data.email, parsed.data.password);
+  if (!result.user) {
+    return NextResponse.json({ error: result.error ?? "Invalid email or password." }, { status: 401 });
   }
 
-  const token = await createSession(user.id);
-  const response = NextResponse.json(
-    { ok: true, user: { id: user.id, email: user.email, displayName: user.displayName } },
-    { status: 200 },
-  );
-
-  // Secure httpOnly session cookie, honoring the configured session TTL
-  // (SESSION_TTL_DAYS) instead of a hardcoded 30 days.
-  const ttlDays = getServerEnv().SESSION_TTL_DAYS;
-  response.cookies.set({
-    name: SESSION_COOKIE,
-    value: token,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000),
-  });
-
-  return response;
+  return NextResponse.json({ ok: true, user: result.user });
 }
