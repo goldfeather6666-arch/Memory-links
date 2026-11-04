@@ -60,9 +60,5 @@ export class ConflictError extends MemoryEngineError {
 }
 
 export function isRetryableError(err: unknown): boolean {
-  return (
-    err instanceof ProviderUnavailableError ||
-    err instanceof EmbeddingProviderUnavailableError ||
-    err instanceof MemoryEngineError
-  );
+  return err instanceof ProviderUnavailableError || err instanceof EmbeddingProviderUnavailableError;
 }
