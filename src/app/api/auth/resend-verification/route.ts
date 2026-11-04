@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { resendVerificationEmail } from "@//server/auth/service";
-import { emailSchema } from "@//server/validation/schemas";
-import { checkAuthRateLimit, getClientRequestIp } from "@//server/auth/rate-limit";
+import { resendVerificationEmail } from "@/server/auth/service";
+import { emailSchema } from "@/server/validation/schemas";
+import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
 
 function emailFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) return null;
