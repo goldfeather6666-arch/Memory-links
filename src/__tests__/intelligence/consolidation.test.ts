@@ -39,8 +39,18 @@ describe("buildConsolidationGroups", () => {
 
   it("detects temporal change when dates differ for same subject", () => {
     const groups = buildConsolidationGroups([
-      mem({ id: "a", content: "I use a Samsung phone", occurredAt: "2026-01-10T00:00:00.000Z" }),
-      mem({ id: "b", content: "I switched to an iPhone", occurredAt: "2026-06-20T00:00:00.000Z" }),
+      mem({
+        id: "a",
+        content: "I use a Samsung phone",
+        occurredAt: "2026-01-10T00:00:00.000Z",
+        entities: [{ type: "product", value: "Phone" }],
+      }),
+      mem({
+        id: "b",
+        content: "I switched to an iPhone",
+        occurredAt: "2026-06-20T00:00:00.000Z",
+        entities: [{ type: "product", value: "Phone" }],
+      }),
     ]);
     expect(groups.some((g) => g.kind === "change")).toBe(true);
   });
