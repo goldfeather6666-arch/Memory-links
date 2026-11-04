@@ -6,7 +6,6 @@
  * missing titles fall back to "Untitled".
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import {
   bearerAuth,
   coerceTimestamp,
