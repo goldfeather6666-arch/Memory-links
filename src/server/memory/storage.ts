@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { queryTenant, withTenant } from "@/db/client";
 
 interface DbClient {
@@ -350,6 +351,5 @@ export async function listMemories(
 }
 
 function hash(input: string): string {
-  const { createHash } = require("crypto") as typeof import("crypto");
   return createHash("sha256").update(input).digest("hex");
 }
