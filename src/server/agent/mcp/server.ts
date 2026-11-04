@@ -1,7 +1,6 @@
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { registerAllResources } from "./resources";
 import { registerAllTools } from "./tools";
-import { principalFromAuthInfo } from "./shared";
 import type { AgentPrincipal } from "../types";
 
 export function buildMcpServer(principal: AgentPrincipal | null): McpServer {
@@ -17,18 +16,24 @@ export function buildMcpServer(principal: AgentPrincipal | null): McpServer {
 /**
  * Shared streamable-HTTP handler for Next.js. Authentication is performed by
  * the route before calling `fetch`; the authenticated principal is passed
- * through `authInfo.extra` to the per-request server factory.
+ * through `authInfo.extra` to the per-request server factory so each request
+ * gets a fresh server bound to the authenticated agent.
  */
 export const mcpHandler = createMcpHandler(
-  (ctx: { authInfo?: { token?: string } }) =>
-    buildMcpServer(ctx.authInfo?.token ? principalFromToken(ctx.authInfo.token) : null),
+  (ctx: { authInfo?: { extra?: Record<string, unknown> } }) => {
+    const e = ctx.authInfo?.extra;
+    const principal: AgentPrincipal | null = e
+      ? {
+          userId: String(e.userId ?? ""),
+          workspaceId: String(e.workspaceId ?? ""),
+          agentId: String(e.agentId ?? ""),
+          name: String(e.name ?? ""),
+          mode: (e.mode as AgentPrincipal["mode"]) ?? "approval",
+          category: (e.category as AgentPrincipal["category"]) ?? "custom",
+          status: (e.status as AgentPrincipal["status"]) ?? "active",
+        }
+      : null;
+    return buildMcpServer(principal);
+  },
   { legacy: "stateless", responseMode: "auto", maxRequestBodySize: 1_000_000 },
 );
-
-// Lightweight bearer-token -> principal resolution used by the factory.
-function principalFromToken(token: string): AgentPrincipal | null {
-  // Real resolution happens in the route (signature check + DB lookup) and is
-  // passed through authInfo.extra; if no extra principal is present we fail
-  // closed (null principal -> no tools/resources).
-  return null;
-}
