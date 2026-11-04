@@ -112,22 +112,25 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
     return p.toString();
   }, [workspaceId, mode, projectId, focusId, focusKind, topic, nodeTypes, relationshipTypes, minImportance, minConfidence, hideDisconnected, from, to]);
 
-  const loadProjection = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchJson<Projection>(`/api/v1/graph?${qs}`);
-      setProjection(data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load graph");
-    } finally {
-      setLoading(false);
-    }
-  }, [qs]);
-
   useEffect(() => {
-    void loadProjection();
-  }, [loadProjection]);
+    let alive = true;
+    const run = async () => {
+      await Promise.resolve(); // defer state updates out of the synchronous effect body
+      setError(null);
+      try {
+        const data = await fetchJson<Projection>(`/api/v1/graph?${qs}`);
+        if (alive) setProjection(data);
+      } catch (e) {
+        if (alive) setError(e instanceof Error ? e.message : "Failed to load graph");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+    void run();
+    return () => {
+      alive = false;
+    };
+  }, [qs]);
 
   const visible = useMemo(() => {
     if (!projection) return { nodes: [], edges: [] };
