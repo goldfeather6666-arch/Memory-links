@@ -8,6 +8,7 @@
  */
 
 import dynamic from 'next/dynamic';
+import { WebGLSafeScene } from '../three/webgl-scene';
 
 const AgentMemory = dynamic(() => import('../three/agent-memory'), {
   ssr: false,
@@ -57,7 +58,9 @@ export default function UniversalAgent() {
 
       <div className="ua-inner">
         <div className="ua-visual">
-          <AgentMemory />
+          <WebGLSafeScene>
+            <AgentMemory />
+          </WebGLSafeScene>
         </div>
         <div className="ua-copy">
           <p className="ua-kicker">Universal agent</p>
