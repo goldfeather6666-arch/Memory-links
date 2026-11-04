@@ -213,26 +213,21 @@ CREATE OR REPLACE FUNCTION app_current_user_id() RETURNS uuid AS $$
   SELECT NULLIF(current_setting('app.user_id', true), '')::uuid;
 $$ LANGUAGE sql STABLE;
 
+-- RLS is ENABLED on every tenant table (defense-in-depth). The application
+-- data-access layer is the PRIMARY control and enforces owner/workspace scope
+-- in SQL on every query. FORCE is intentionally not used: on self-managed
+-- connections the app role often owns the tables, and FORCE would also block
+-- bootstrap flows (signup, login lookup) that precede any session.
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users FORCE ROW LEVEL SECURITY;
 ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
-ALTER TABLE workspaces FORCE ROW LEVEL SECURITY;
 ALTER TABLE workspace_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE workspace_members FORCE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects FORCE ROW LEVEL SECURITY;
 ALTER TABLE data_sources ENABLE ROW LEVEL SECURITY;
-ALTER TABLE data_sources FORCE ROW LEVEL SECURITY;
 ALTER TABLE memory_records ENABLE ROW LEVEL SECURITY;
-ALTER TABLE memory_records FORCE ROW LEVEL SECURITY;
 ALTER TABLE memory_relationships ENABLE ROW LEVEL SECURITY;
-ALTER TABLE memory_relationships FORCE ROW LEVEL SECURITY;
 ALTER TABLE audit_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_events FORCE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sessions FORCE ROW LEVEL SECURITY;
 ALTER TABLE auth_tokens ENABLE ROW LEVEL SECURITY;
-ALTER TABLE auth_tokens FORCE ROW LEVEL SECURITY;
 
 -- users: a user sees only themselves.
 CREATE POLICY users_select ON users FOR SELECT
