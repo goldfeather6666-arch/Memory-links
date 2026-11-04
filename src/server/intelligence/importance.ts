@@ -372,5 +372,5 @@ export async function getMemoryMarkers(
   );
   if (!rows[0]) return {};
   const intelligence = (rows[0].metadata as Record<string, unknown>)?.intelligence;
-  return (intelligence as Record<string, unknown>) ?? {};
+  return (intelligence as Record<string, boolean>) ?? {};
 }
