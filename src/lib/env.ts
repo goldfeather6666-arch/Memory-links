@@ -40,8 +40,6 @@ export function getServerEnv(): ServerEnv {
   return cached;
 }
 
-export const serverEnv = getServerEnv();
-
 /** Public, safe-to-expose client config. */
 export const publicEnv = {
   siteUrl:
