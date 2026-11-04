@@ -7,6 +7,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   bearerAuth,
   fetchJson,
@@ -48,7 +49,7 @@ export const jiraAdapter: ConnectorAdapter = {
     const res = await fetch(url, { headers: bearerAuth(params.accessToken) });
     const data = await fetchJson(res, "jira");
     const projects = Array.isArray(data) ? data : [];
-    const items: NormalizedSource[] = projects.map((p) => {
+    const items: RawSource[] = projects.map((p) => {
       const rec = p as Record<string, unknown>;
       return {
         externalId: typeof rec.id === "string" ? rec.id : String(rec.id ?? ""),
