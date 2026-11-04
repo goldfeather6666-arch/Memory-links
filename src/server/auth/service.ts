@@ -208,17 +208,17 @@ export async function resetPassword(
   }
 
   // Legacy custom token path (self-managed reset tokens).
-  const { consumeAuthToken, updatePasswordHash, revokeActorTokensForUser } = await import(
+  const { consumeAuthToken, revokeActorTokensForUser } = await import(
     "@/server/data/auth-tokens"
   ).then((m) => m);
   const { hashPassword } = await import("@/server/auth/password");
+  const { updatePasswordHash } = await import("@/server/data/users");
   const userId = await consumeAuthToken(rawToken, "password_reset");
   if (!userId) {
     return { ok: false, error: "Invalid, expired, or already-used reset token." };
   }
   const newHash = await hashPassword(newPassword);
   await updatePasswordHash(userId, newHash);
-  const { destroySessionsForUser } = await import("@/server/auth/session");
   await destroySessionsForUser(userId);
   await revokeActorTokensForUser(userId);
   await recordAuditEvent({ actorId: userId, action: "auth.password_reset" });
