@@ -2289,7 +2289,7 @@ export const CONVERSATIONS: DemoConversation[] = [
     answer:
       "The survey, informed by Dr. Elena at BrightPath, found hybrid retrieval " +
       "outperforms pure embedding search and temporal signals improve recall.",
-    evidenceKeys: ["sem-g-05", "epi-e-17", "sem-c-13", "doc-research"],
+    evidenceKeys: ["sem-g-05", "epi-e-17", "sem-c-13", "sem-c-06"],
   },
   {
     key: "cv-decision-support",
@@ -2308,7 +2308,7 @@ export const CONVERSATIONS: DemoConversation[] = [
     answer:
       "Even though Rivet/Cloudline is a separate venture, the March strategy work " +
       "reuses Lumen's design system and reinforces the focus on team features.",
-    evidenceKeys: ["sem-c-09", "asso-a-05", "sem-d-10", "doc-business"],
+    evidenceKeys: ["sem-c-09", "asso-a-05", "sem-d-10", "sem-g-04"],
   },
   {
     key: "cv-comprehensive",
