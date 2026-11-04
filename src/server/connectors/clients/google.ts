@@ -7,7 +7,6 @@
  * for a bounded subset (avoiding quota burn) — never full message bodies.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import {
   bearerAuth,
   coerceTimestamp,
