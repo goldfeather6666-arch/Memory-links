@@ -90,7 +90,6 @@ function InstancedNodes({
     return { geometry: g, material: m };
   }, []);
 
-  /* eslint-disable react-hooks/immutability -- imperative InstancedMesh setup. */
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -105,7 +104,6 @@ function InstancedNodes({
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }, [nodeCount, positions, scales, colors]);
-  /* eslint-enable react-hooks/immutability */
 
   useEffect(
     () => () => {
@@ -206,13 +204,6 @@ function InstancedNodes({
       }}
     />
   );
-}
-
-/** Connected node indices (excluding self) for a given selected index. */
-function connectedNodeIndices(selected: number): Set<number> {
-  // This is replaced by the memoized adjacency map built in the parent. Kept
-  // as a safety fallback that returns an empty set when no adjacency is given.
-  return new Set<number>();
 }
 
 interface EdgeLinesProps {
