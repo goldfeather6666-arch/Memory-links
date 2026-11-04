@@ -209,7 +209,7 @@ export function registerAllTools(server: McpServer, principal: AgentPrincipal | 
     validUntil: z.string().nullable().optional(),
     entities: z
       .array(z.object({ name: z.string().min(1), type: z.string().optional() }))
-      .maxItems(100)
+      .max(100)
       .optional(),
   };
 
