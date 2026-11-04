@@ -122,7 +122,12 @@ export async function getMemory(userId: string, memoryId: string): Promise<Memor
     `SELECT ${MEMORY_SELECT} FROM memory_records WHERE id = $1`,
     [memoryId],
   );
-  return rows[0] ? mapMemoryRow(rows[0]) : null;
+  const view = rows[0] ? mapMemoryRow(rows[0]) : null;
+  if (!view) return null;
+  if (!(await userHasWorkspaceAccess(userId, view.workspaceId))) {
+    return null;
+  }
+  return view;
 }
 
 export interface MemoryPatch {
@@ -246,6 +251,8 @@ async function recordVersionChange(
 }
 
 export async function deleteMemoryHard(userId: string, memoryId: string): Promise<boolean> {
+  const memory = await getMemory(userId, memoryId);
+  if (!memory) return false;
   const res = await queryTenant(
     userId,
     `DELETE FROM memory_records WHERE id = $1`,
@@ -258,6 +265,8 @@ export async function getMemoryEntities(
   userId: string,
   memoryId: string,
 ): Promise<{ type: string; value: string; confidence: number }[]> {
+  const memory = await getMemory(userId, memoryId);
+  if (!memory) return [];
   const rows = await queryTenant<{ type: string; value: string; confidence: number }>(
     userId,
     `SELECT entity_type AS type, entity_value AS value,
@@ -272,6 +281,8 @@ export async function getMemoryVersions(
   userId: string,
   memoryId: string,
 ): Promise<MemoryVersionView[]> {
+  const memory = await getMemory(userId, memoryId);
+  if (!memory) return [];
   const rows = await queryTenant<Record<string, unknown>>(
     userId,
     `SELECT id, memory_id AS "memoryId", version, content, summary,
