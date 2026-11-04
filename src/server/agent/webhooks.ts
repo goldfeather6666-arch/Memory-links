@@ -177,14 +177,14 @@ async function createAndDeliver(
         WHERE id=$1`,
       [deliveryId, status, res.status, bodyText],
     );
-    if (!res.ok) await scheduleRetry(userId, deliveryId, 1, String(sub.id));
+    if (!res.ok) await scheduleRetry(userId, deliveryId, 1);
   } catch (e) {
     await queryTenant(
       userId,
       `UPDATE webhook_deliveries SET status='failed', response_body=$2, next_attempt_at = now() + interval '1 minute' WHERE id=$1`,
       [deliveryId, e instanceof Error ? e.message.slice(0, 2000) : "delivery error"],
     );
-    await scheduleRetry(userId, deliveryId, 1, String(sub.id));
+    await scheduleRetry(userId, deliveryId, 1);
   }
 }
 
@@ -285,9 +285,9 @@ export async function processPendingDeliveries(userId?: string): Promise<number>
       if (userId) await queryTenant(userId, upd, [String(row.id), status, res.status, bodyText]);
       else await queryRaw(upd, [String(row.id), status, res.status, bodyText]);
       attempted += 1;
-      if (!res.ok) await scheduleRetry(userId ?? "", String(row.id), Number(row.attempt), String(row.subscription_id));
+      if (!res.ok) await scheduleRetry(userId ?? "", String(row.id), Number(row.attempt));
     } catch {
-      await scheduleRetry(userId ?? "", String(row.id), Number(row.attempt), String(row.subscription_id));
+      await scheduleRetry(userId ?? "", String(row.id), Number(row.attempt));
       attempted += 1;
     }
   }
