@@ -71,6 +71,11 @@ export async function sendMail(message: MailMessage): Promise<void> {
 }
 
 export function buildActionUrl(path: string): string {
-  const base = getServerEnv().APP_URL.replace(/\/$/, "");
+  // Prefer an explicitly configured public site URL so verification/reset
+  // links resolve correctly in production; fall back to APP_URL (dev).
+  const base = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    getServerEnv().APP_URL
+  ).replace(/\/$/, "");
   return `${base}${path}`;
 }
