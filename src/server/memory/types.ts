@@ -1,5 +1,7 @@
 import type { MemoryType, PrivacyClassification } from "@/db/schema";
 
+export type { MemoryType, PrivacyClassification } from "@/db/schema";
+
 export type MemoryState =
   | "pending"
   | "processing"
