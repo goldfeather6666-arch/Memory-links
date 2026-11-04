@@ -6,7 +6,6 @@
  * normalises each entry. Requires no access token.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import {
   ProviderHttpError,
   decodeXmlEntities,
@@ -65,6 +64,7 @@ export const rssAdapter: ConnectorAdapter = {
   provider: "rss",
   async resolveAccount(_accessToken: string): Promise<AccountIdentity> {
     // RSS has no account identity; the feed URL is the identity.
+    void _accessToken;
     return { id: "rss", name: "RSS" };
   },
   async fetchInitial(params: FetchPageParams): Promise<FetchPageResult> {
