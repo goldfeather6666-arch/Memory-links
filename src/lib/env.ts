@@ -60,6 +60,8 @@ const serverEnvSchema = z.object({
   JIRA_OAUTH_CLIENT_SECRET: z.string().optional(),
   DROPBOX_OAUTH_APP_KEY: z.string().optional(),
   DROPBOX_OAUTH_APP_SECRET: z.string().optional(),
+  MICROSOFT_OAUTH_CLIENT_ID: z.string().optional(),
+  MICROSOFT_OAUTH_CLIENT_SECRET: z.string().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
