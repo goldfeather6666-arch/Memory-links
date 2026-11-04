@@ -6,6 +6,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   bearerAuth,
   coerceTimestamp,
@@ -53,7 +54,7 @@ export const dropboxAdapter: ConnectorAdapter = {
       cursor?: string;
     };
     const entries = Array.isArray(data.entries) ? data.entries : [];
-    const items: NormalizedSource[] = entries
+    const items: RawSource[] = entries
       .filter((e) => e[".tag"] === "file")
       .map((e) => ({
         externalId: typeof e.id === "string" ? e.id : String(e.id ?? ""),
