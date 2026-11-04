@@ -51,7 +51,8 @@ export function registerAllTools(server: McpServer, principal: AgentPrincipal | 
         to: z.string().optional(),
       }),
     },
-    async ({ q, memoryType, limit, offset, from, to }: z.infer<typeof z.never>, ctx: Ctx) => {
+    async (args: { q?: string; memoryType?: string; limit?: number; offset?: number; from?: string; to?: string }) => {
+    const { q, memoryType, limit, offset, from, to } = args;
       if (!p) return err("Not authenticated", "UNAUTHORIZED");
       const perms = await P();
       if (!canReadMemory(perms, memoryType)) return err("No read:memory scope", "FORBIDDEN");
