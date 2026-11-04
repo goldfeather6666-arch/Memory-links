@@ -61,7 +61,7 @@ export async function findDuplicate(
   return { outcome: "new", reason: "no duplicate found" };
 }
 
-function normalizeSimilarity(a: string, b: string): number {
+export function normalizeSimilarity(a: string, b: string): number {
   if (!a || !b) return 0;
   if (a === b) return 1;
   const maxLen = Math.max(a.length, b.length);
