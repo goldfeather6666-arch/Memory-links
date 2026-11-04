@@ -20,6 +20,10 @@ import type {
  */
 
 function joinTitleContent(source: NormalizedSource): string {
+  // A source with no meaningful body content is skipped regardless of title.
+  if (!source.content || !source.content.trim()) {
+    return "";
+  }
   return [source.title, source.content].filter(Boolean).join("\n\n").trim();
 }
 
