@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+
+jobs:
+  lint-typecheck-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Production build
+        run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      # Install both engines: the 'mobile' project uses the iPhone 13 device
+      # (WebKit), and 'tablet'/'desktop' run on Chromium.
+      - run: npx playwright install --with-deps chromium webkit
+      - name: End-to-end tests
+        run: npm run test:e2e
