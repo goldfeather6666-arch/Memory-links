@@ -325,7 +325,7 @@ async function seedConversations(
       `INSERT INTO conversation_messages (
          conversation_id, workspace_id, owner_id, role, content, evidence, status
        ) VALUES ($1,$2,$3,'assistant',$4,$5,'completed')`,
-      [conversationId, workspaceId, userId, c.answer, evidence],
+      [conversationId, workspaceId, userId, c.answer, JSON.stringify(evidence)],
     );
   }
 }
