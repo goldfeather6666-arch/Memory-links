@@ -17,7 +17,7 @@ export default async function GraphPage({
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-6">
         <EmptyState
-          icon="graph"
+          icon={<span className="text-3xl">🤖</span>}
           title="Sign in to view your knowledge graph"
           description="Your graph is workspace-scoped and private."
         />
@@ -30,7 +30,7 @@ export default async function GraphPage({
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-6">
         <EmptyState
-          icon="graph"
+          icon={<span className="text-3xl">🗂️</span>}
           title="Create a workspace"
           description="You need a workspace before you can explore your knowledge graph."
         />
