@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/server";
+import type { MemoryType } from "@/db/schema";
 import { recallMemories } from "@/server/memory/retrieval";
 import { getMemory } from "@/server/memory/storage";
 import { listRelatedMemories } from "@/server/memory/relationships";
