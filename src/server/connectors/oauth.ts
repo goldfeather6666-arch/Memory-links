@@ -64,14 +64,12 @@ function getClientCredentials(provider: ProviderId): ClientCredentials {
       };
     }
     case "onedrive": {
-      // No Microsoft env vars exist yet; use the Google client as a
-      // placeholder so the flow can be exercised end-to-end once configured.
-      if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.CONNECTOR_ENCRYPTION_SECRET) {
+      if (!env.MICROSOFT_OAUTH_CLIENT_ID || !env.MICROSOFT_OAUTH_CLIENT_SECRET) {
         throw new Error("NOT_CONFIGURED");
       }
       return {
-        clientId: env.GOOGLE_OAUTH_CLIENT_ID,
-        clientSecret: env.GOOGLE_OAUTH_CLIENT_SECRET ?? "",
+        clientId: env.MICROSOFT_OAUTH_CLIENT_ID,
+        clientSecret: env.MICROSOFT_OAUTH_CLIENT_SECRET,
       };
     }
     case "github": {
@@ -355,6 +353,7 @@ export async function handleOAuthCallback(
   );
   if (!states[0]) throw new Error("INVALID_STATE");
   const s = states[0];
+  if (s.provider !== provider) throw new Error("INVALID_STATE");
   const userId = s.user_id;
 
   // Consume the state row regardless of outcome (single use).
