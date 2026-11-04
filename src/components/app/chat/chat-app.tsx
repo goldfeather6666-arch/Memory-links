@@ -196,11 +196,12 @@ export function ChatApp({
 
   // Load initial data on mount. Both loaders are async — setState runs only
   // after the network call resolves, so it is never a synchronous render update.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     void loadSettings();
     void loadConversations();
   }, [loadSettings, loadConversations]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const contextMeta = useMemo(() => {
     const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
