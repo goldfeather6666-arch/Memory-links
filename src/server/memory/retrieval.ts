@@ -14,6 +14,15 @@ import type {
 
 const CANDIDATE_LIMIT = 300;
 
+const BASE_COLS = `
+  id, workspace_id AS "workspaceId", owner_id AS "ownerId",
+  memory_type AS "memoryType", state, content, summary, source_ref AS "sourceRef",
+  confidence, importance, valid_from AS "validFrom", valid_until AS "validUntil",
+  privacy_classification AS "privacyClassification", metadata,
+  version, embedding_model AS "embeddingModel", embedding_dim AS "embeddingDim",
+  created_at AS "createdAt", updated_at AS "updatedAt", embedding
+`;
+
 export async function recallMemories(
   userId: string,
   opts: RecallOptions,
@@ -67,7 +76,6 @@ export async function recallMemories(
     method = "keyword";
   }
 
-  // Total matching rows (before ranking pagination).
   const countRows = await queryTenant<{ count: string }>(
     userId,
     `SELECT count(*)::text AS count FROM memory_records WHERE ${whereSql}`,
@@ -81,15 +89,19 @@ export async function recallMemories(
     queryVector = result.vectors[0] ?? null;
   }
 
+  // For lexical scoring we append the query text as the next parameter.
+  let rankExpr = "NULL::float4 AS rank";
   let orderSql = `created_at DESC`;
-  if (query && method === "keyword") {
+  if (query && method !== "semantic") {
     values.push(query);
-    orderSql = `ts_rank_cd(search_vector, plainto_tsquery('english', $${values.length})) DESC, created_at DESC`;
+    const qIdx = values.length;
+    rankExpr = `ts_rank_cd(search_vector, plainto_tsquery('english', $${qIdx})) AS rank`;
+    orderSql = `ts_rank_cd(search_vector, plainto_tsquery('english', $${qIdx})) DESC, created_at DESC`;
   }
 
   const rows = await queryTenant<Record<string, unknown>>(
     userId,
-    `SELECT ${MEMORY_SELECT_COLS}, embedding
+    `SELECT ${BASE_COLS}, ${rankExpr}
        FROM memory_records
       WHERE ${whereSql}
       ORDER BY ${orderSql}
@@ -104,7 +116,7 @@ export async function recallMemories(
   type Scored = { view: RelevanceResult; rank: number | null; cos: number | null };
   const scored: Scored[] = rows.map((row) => {
     const base = toRelevance(row);
-    const rank = row.rank !== undefined && row.rank !== null ? Number(row.rank) : null;
+    const rank = row.rank !== null && row.rank !== undefined ? Number(row.rank) : null;
     let cos: number | null = null;
     if (queryVector && row.embedding) {
       const vec = parseVector(row.embedding);
@@ -168,13 +180,3 @@ function parseVector(value: unknown): number[] | null {
   }
   return null;
 }
-
-export const MEMORY_SELECT_COLS = `
-  id, workspace_id AS "workspaceId", owner_id AS "ownerId",
-  memory_type AS "memoryType", state, content, summary, source_ref AS "sourceRef",
-  confidence, importance, valid_from AS "validFrom", valid_until AS "validUntil",
-  privacy_classification AS "privacyClassification", metadata,
-  version, embedding_model AS "embeddingModel", embedding_dim AS "embeddingDim",
-  created_at AS "createdAt", updated_at AS "updatedAt",
-  ts_rank_cd(search_vector, plainto_tsquery('english', $q)) AS rank
-`;
