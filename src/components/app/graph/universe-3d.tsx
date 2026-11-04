@@ -60,6 +60,7 @@ interface InstancedNodesProps {
   scales: Float32Array;
   colors: THREE.Color[];
   adjacency: number[][];
+  edgeEndpoints: [number, number][];
   selectedId: string | null;
   indexById: Map<string, number>;
   onSelect: (id: string | null) => void;
@@ -73,6 +74,7 @@ function InstancedNodes({
   scales,
   colors,
   adjacency,
+  edgeEndpoints,
   selectedId,
   indexById,
   onSelect,
@@ -122,7 +124,11 @@ function InstancedNodes({
       // Connected node indices for the selected node: for each edge incident
       // to the selected node, mark the other endpoint.
       const connSet = new Set<number>();
-      for (const i of adjacency[sel] ?? []) connSet.add(i);
+      for (const edgeIdx of adjacency[sel] ?? []) {
+        const [a, b] = edgeEndpoints[edgeIdx] ?? [-1, -1];
+        if (a >= 0) connSet.add(a);
+        if (b >= 0) connSet.add(b);
+      }
       for (let i = 0; i < nodeCount; i++) {
         if (i === sel) {
           mesh.setColorAt(
@@ -489,6 +495,7 @@ export function Universe3D({ nodes, edges, selectedId, onSelect }: Universe3DPro
             scales={scales}
             colors={colors}
             adjacency={adjacency}
+            edgeEndpoints={edgeEndpoints}
             selectedId={selectedId}
             indexById={indexById}
             onSelect={onSelect}
