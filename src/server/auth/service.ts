@@ -55,8 +55,11 @@ function toUser(sbUser: {
  */
 async function provisionUserRow(user: User): Promise<void> {
   try {
+    // Run as the tenant so the `users_insert` RLS policy (id =
+    // app_current_user_id()) passes. Same scoping required for the
+    // ON CONFLICT DO UPDATE path via `users_update`.
     await queryTenant(
-      null,
+      user.id,
       `INSERT INTO users (id, email, display_name, avatar_url, email_verified)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (id) DO UPDATE SET
