@@ -51,10 +51,6 @@ export interface EnsureResult {
 
 const MEMORY_TYPE_SET = new Set(["episodic", "semantic", "procedural", "associative"]);
 const PROJECT_STATUS_SET = new Set(["active", "archived", "planned"]);
-const INGESTION_STATUS_SET = new Set(["pending", "processing", "completed", "failed", "retryable"]);
-const CONVERSATION_STATUS_SET = new Set(["active", "archived"]);
-const MESSAGE_ROLE_SET = new Set(["user", "assistant", "system"]);
-const MESSAGE_STATUS_SET = new Set(["pending", "streaming", "completed", "failed", "retryable", "cancelled"]);
 const CONSOLIDATION_KIND_SET = new Set([
   "related", "repeated_fact", "repeated_preference", "project", "event",
   "decision", "change", "gap", "contradiction", "summary",
@@ -274,6 +270,7 @@ async function seedRelationships(
   let count = 0;
   const MAX = 250;
   for (const [entityName, keys] of entityToKeys) {
+    void entityName;
     if (keys.length < 2) continue;
     for (let i = 0; i < keys.length; i++) {
       for (let j = i + 1; j < keys.length; j++) {
