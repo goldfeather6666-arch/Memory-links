@@ -55,12 +55,22 @@ const paths: Record<IconName, React.ReactNode> = {
   plus: <path d="M12 5v14M5 12h14" />,
   "arrow-right": <path d="M5 12h14m-6-6l6 6-6 6" />,
   spark: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />,
-  search: <circle cx="11" cy="11" r="6" /><path d="M15.5 15.5L21 21" />,
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M15.5 15.5L21 21" />
+    </>
+  ),
   logout: <path d="M9 5H5v14h4m0-7h10m-3-3l3 3-3 3" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
   check: <path d="M5 12l5 5L19 7" />,
-  database: <ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />,
+  database: (
+    <>
+      <ellipse cx="12" cy="5" rx="8" ry="3" />
+      <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+    </>
+  ),
   clock: <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />,
   users: <path d="M9 11a4 4 0 100-8 4 4 0 000 8zM3 21v-1a6 6 0 0112 0v1M17 11a3.5 3.5 0 100-7m1 7a5 5 0 013 4.6V21" />,
   shield: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />,
