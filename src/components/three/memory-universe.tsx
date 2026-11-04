@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { CanvasMountGate } from './canvas-mount-gate'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import gsap from 'gsap'
@@ -275,6 +276,7 @@ export default function MemoryUniverse() {
   const { ref, inView } = useInView<HTMLDivElement>()
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas
         dpr={[1, 2]}
         gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
@@ -295,6 +297,7 @@ export default function MemoryUniverse() {
           <Bloom intensity={0.85} luminanceThreshold={0.2} luminanceSmoothing={0.6} mipmapBlur radius={0.7} />
         </EffectComposer>
       </Canvas>
+      </CanvasMountGate>
     </div>
   )
 }
