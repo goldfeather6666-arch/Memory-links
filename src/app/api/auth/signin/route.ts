@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { signin } from "@/server/auth/service";
-import { createSession, SESSION_COOKIE } from "@/server/auth/session";
+import { createSession } from "@/server/auth/session";
+import { SESSION_COOKIE } from "@/server/auth/constants";
 import { signinSchema } from "@/server/validation/schemas";
 
 export async function POST(req: Request) {
