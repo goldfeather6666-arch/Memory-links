@@ -249,6 +249,20 @@ export async function deleteMemoryHard(userId: string, memoryId: string): Promis
   return (res as unknown as { rowCount: number }).rowCount > 0;
 }
 
+export async function getMemoryEntities(
+  userId: string,
+  memoryId: string,
+): Promise<{ type: string; value: string; confidence: number }[]> {
+  const rows = await queryTenant<{ type: string; value: string; confidence: number }>(
+    userId,
+    `SELECT entity_type AS type, entity_value AS value,
+            COALESCE(confidence, 0) AS confidence
+       FROM memory_entities WHERE memory_id = $1 ORDER BY confidence DESC`,
+    [memoryId],
+  );
+  return rows;
+}
+
 export async function getMemoryVersions(
   userId: string,
   memoryId: string,
