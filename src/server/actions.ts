@@ -43,7 +43,7 @@ export async function createWorkspaceAction(input: {
     const ws = await createWorkspace(
       session.id,
       parsed.data.name,
-      parsed.data.description,
+      parsed.data.description ?? null,
       parsed.data.settings ?? null,
     );
     await recordAuditEvent({
@@ -82,7 +82,7 @@ export async function createProjectAction(input: {
       session.id,
       parsed.data.workspaceId,
       parsed.data.name,
-      parsed.data.description,
+      parsed.data.description ?? null,
       parsed.data.status,
       parsed.data.metadata ?? null,
     );
@@ -120,7 +120,10 @@ export async function createMemoryAction(input: {
   }
 
   try {
-    const record = await createMemoryRecord(session.id, parsed.data);
+    const record = await createMemoryRecord(session.id, {
+      ...parsed.data,
+      metadata: parsed.data.metadata ?? undefined,
+    });
     await recordAuditEvent({
       actorId: session.id,
       action: "memory.create",
