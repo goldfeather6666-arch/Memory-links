@@ -34,17 +34,18 @@ const TOUR_LINKS = [
  * the command center for demo workspaces.
  */
 export function OnboardingTour() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    let dismissed = false;
+  // Read the dismissal flag lazily during render (not in an effect) so we
+  // avoid calling setState synchronously inside an effect body.
+  const [visible, setVisible] = useState(() => {
     try {
-      dismissed = window.localStorage.getItem(STORAGE_KEY) === "1";
+      return window.localStorage.getItem(STORAGE_KEY) !== "1";
     } catch {
       // ignore storage errors; default to showing the tour
+      return true;
     }
-    setVisible(!dismissed);
+  });
 
+  useEffect(() => {
     const onRestart = () => setVisible(true);
     window.addEventListener(RESTART_EVENT, onRestart);
     return () => window.removeEventListener(RESTART_EVENT, onRestart);
