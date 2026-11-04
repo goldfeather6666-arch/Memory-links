@@ -273,7 +273,7 @@ export function IntegrationsDashboard({ workspaceId }: { workspaceId: string }) 
                   <Button
                     type="button"
                     size="sm"
-                    disabled={!connector.available || connector.connected}
+                    disabled={!connector.available || connector.connected > 0}
                     loading={connectingProvider === connector.provider}
                     onClick={() => connect(connector.provider)}
                   >
