@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import { verifyEmail } from "@/server/auth/service";
 import { verifyEmailSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+import { isDatabaseConfigured } from "@/lib/env";
 
 export async function GET(req: Request) {
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Email verification isn't configured for this environment yet." },
+      { status: 503 },
+    );
+  }
+
   const key = getClientRequestIp(req);
   const rl = await checkAuthRateLimit(key, "verify-email");
   if (!rl.allowed) {
