@@ -43,17 +43,17 @@ describe("candidateEntitiesFromMemory", () => {
     expect(org!.aliases.length).toBeGreaterThan(0);
   });
 
-  it("merges duplicate candidates across rows (max confidence, union aliases)", () => {
+  it("merges duplicate canonical entities across rows (max confidence, union aliases)", () => {
     const out = candidateEntitiesFromMemory({
       ...base,
       entities: [
-        { type: "organization", value: "Acme Inc", confidence: 0.4 },
-        { type: "organization", value: "Acme Inc.", confidence: 0.8 },
+        { type: "project", value: "BestApp", confidence: 0.4 },
+        { type: "project", value: "BestApp", confidence: 0.8 },
       ],
     });
-    const orgs = out.filter((e) => e.entityType === "organization");
-    expect(orgs.length).toBe(1);
-    expect(orgs[0].confidence).toBeCloseTo(0.8);
+    const projects = out.filter((e) => e.entityType === "project");
+    expect(projects.length).toBe(1);
+    expect(projects[0].confidence).toBeCloseTo(0.8);
   });
 
   it("falls back to concept type for unknown types", () => {
