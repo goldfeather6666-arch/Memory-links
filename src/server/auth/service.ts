@@ -31,8 +31,9 @@ function normalizeEmail(email: string): string {
 }
 
 /**
- * Create a new user. Returns the user and whether a verification email was
- * actually delivered (a transport may be dev-limited).
+ * Create a new user. Returns the user and whether an email was delivered.
+ * Email verification is removed from the flow, so accounts are created with
+ * email_verified = true and no message is ever sent (emailSent is always false).
  */
 export async function signup(input: SignupInput): Promise<SignupResult> {
   const email = normalizeEmail(input.email);
@@ -48,8 +49,8 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
     updatedAt: string;
   }>(
     null,
-    `INSERT INTO users (email, display_name, password_hash)
-     VALUES ($1, $2, $3)
+    `INSERT INTO users (email, display_name, password_hash, email_verified)
+     VALUES ($1, $2, $3, true)
      RETURNING id, email, display_name AS "displayName", avatar_url AS "avatarUrl",
                email_verified AS "emailVerified", created_at AS "createdAt",
                updated_at AS "updatedAt"`,
@@ -68,24 +69,8 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
 
   await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
 
-  // Issue verification token + email.
-  const token = await createAuthToken(user.id, "email_verify");
-  const url = buildActionUrl(`/verify-email?token=${encodeURIComponent(token)}`);
-  let emailSent = false;
-  try {
-    await sendMail({
-      to: user.email,
-      subject: "Verify your MNEMOSYNE email",
-      text: `Welcome to MNEMOSYNE! Confirm your email by visiting:\n\n${url}\n\nThis link expires in 24 hours.`,
-    });
-    emailSent = true;
-  } catch {
-    // Delivery failure (e.g. SMTP unconfigured). The account is created; we
-    // surface this honestly to the caller.
-    emailSent = false;
-  }
-
-  return { user, emailSent };
+  // Email verification is removed: no token is issued and no email is sent.
+  return { user, emailSent: false };
 }
 
 export interface SigninResult {
@@ -114,9 +99,6 @@ export async function signin(
   const row = rows[0];
   if (!row) {
     return { user: null, error: "Invalid email or password." };
-  }
-  if (!row.emailVerified) {
-    return { user: null, error: "Please verify your email before signing in." };
   }
 
   await recordAuditEvent({ actorId: row.id, action: "auth.signin" });
@@ -155,44 +137,16 @@ export interface ResendResult {
 }
 
 /**
- * Re-issue a verification email for an unverified account. Returns ok=true
- * regardless of whether the account exists (avoids account enumeration);
- * emailSent reflects actual delivery of the message.
+ * Email verification has been removed from the auth flow. This endpoint is
+ * kept as a harmless, honest no-op: it never sends mail, creates tokens, or
+ * records side effects. It exists solely to keep older callers working.
  */
 export async function resendVerificationEmail(
   emailInput: string,
 ): Promise<ResendResult> {
-  const email = normalizeEmail(emailInput);
-  const rows = await queryTenant<{ id: string; emailVerified: boolean }>(
-    null,
-    `SELECT id, email_verified AS "emailVerified" FROM users WHERE email = $1 LIMIT 1`,
-    [email],
-  );
-  // Do not reveal whether the account exists.
-  if (rows.length === 0) {
-    return { ok: true, emailSent: false };
-  }
-  const row = rows[0];
-  if (row.emailVerified) {
-    // Already verified — nothing to send; still return ok to avoid enumeration.
-    return { ok: true, emailSent: false };
-  }
-
-  const token = await createAuthToken(row.id, "email_verify");
-  const url = buildActionUrl(`/verify-email?token=${encodeURIComponent(token)}`);
-  let emailSent = false;
-  try {
-    await sendMail({
-      to: email,
-      subject: "Verify your MNEMOSYNE email",
-      text: `Confirm your email by visiting:\n\n${url}\n\nThis link expires in 24 hours.`,
-    });
-    emailSent = true;
-  } catch {
-    emailSent = false;
-  }
-  await recordAuditEvent({ actorId: row.id, action: "auth.verification_resent" });
-  return { ok: true, emailSent };
+  // Normalize the input to honor the existing contract; no mail or token work.
+  void normalizeEmail(emailInput);
+  return { ok: true, emailSent: false };
 }
 
 export async function verifyEmail(rawToken: string): Promise<{ ok: boolean; error?: string }> {
