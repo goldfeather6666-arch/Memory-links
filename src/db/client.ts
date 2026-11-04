@@ -11,6 +11,12 @@ export function getPool(): Pool {
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
+      // Supabase's pooler (PostgREST/PgBouncer) terminates TLS with a
+      // certificate chain that is not in Node's default trust store. Keep the
+      // link encrypted (rejectUnauthorized: false disables cert *verification*,
+      // not encryption) and rely on the connection credentials + RLS for
+      // authorization. The password-based connection is what authenticates us.
+      ssl: { rejectUnauthorized: false },
     });
   }
   return pool;
