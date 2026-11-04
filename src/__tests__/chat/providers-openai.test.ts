@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createOpenAIProvider } from "@/server/chat/providers/openai";
 import { ProviderUnavailableError } from "@/server/chat/providers/types";
 
-define makeFetchResponse(init: {
+function makeFetchResponse(init: {
   ok?: boolean;
   status?: number;
   json?: unknown;
