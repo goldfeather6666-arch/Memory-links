@@ -6,7 +6,6 @@
  * with cursor-based pagination.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import {
   ProviderHttpError,
   bearerAuth,
