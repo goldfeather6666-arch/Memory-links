@@ -9,6 +9,7 @@
  */
 
 import dynamic from 'next/dynamic';
+import { WebGLSafeScene } from '../three/webgl-scene';
 
 const DataStreams = dynamic(() => import('../three/data-streams'), {
   ssr: false,
@@ -100,7 +101,9 @@ export default function DigitalUniverse() {
       <div className="du-inner">
         <div className="du-hero">
           <div className="du-canvas-wrap">
-            <DataStreams />
+            <WebGLSafeScene>
+              <DataStreams />
+            </WebGLSafeScene>
           </div>
           <div className="du-overlay">
             <div>
