@@ -31,8 +31,6 @@ function err(message: string, code = "INVALID_REQUEST") {
   return { isError: true as const, content: [{ type: "text" as const, text: `${code}: ${message}` }] };
 }
 
-type Ctx = { sessionId?: string };
-
 export function registerAllTools(server: McpServer, principal: AgentPrincipal | null): void {
   const p = principal;
   const P = async () => (p ? loadPerms(p) : null);
