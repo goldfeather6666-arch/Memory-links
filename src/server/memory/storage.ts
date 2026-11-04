@@ -1,4 +1,8 @@
-import { queryTenant, withTenant, type PoolClient } from "@/db/client";
+import { queryTenant, withTenant } from "@/db/client";
+
+interface DbClient {
+  query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
+}
 import { userHasWorkspaceAccess } from "@/server/data/workspaces";
 import type { MemoryType, PrivacyClassification } from "@/db/schema";
 import type {
@@ -41,7 +45,7 @@ export function mapMemoryRow(row: Record<string, unknown>): MemoryView {
   };
 }
 
-async function insertEntityRows(client: PoolClient, memoryId: string, entities: EntityRef[]): Promise<void> {
+async function insertEntityRows(client: DbClient, memoryId: string, entities: EntityRef[]): Promise<void> {
   if (entities.length === 0) return;
   for (const e of entities) {
     await client.query(
@@ -122,7 +126,7 @@ export async function getMemory(userId: string, memoryId: string): Promise<Memor
 
 export interface MemoryPatch {
   content?: string;
-  summary?: string;
+  summary?: string | null;
   memoryType?: MemoryType;
   confidence?: number | null;
   validFrom?: string | null;
