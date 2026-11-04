@@ -72,7 +72,11 @@ const mockQueryTenant = vi.fn(
 );
 
 vi.mock("@/db/client", () => ({
-  queryTenant: (...args: unknown[]) => mockQueryTenant(...args),
+  queryTenant: (
+    _userId: string | null,
+    text: string,
+    values?: unknown[],
+  ) => mockQueryTenant(_userId, text, values ?? []),
 }));
 
 const T0 = new Date("2026-01-15T00:00:00Z");
