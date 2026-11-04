@@ -43,7 +43,7 @@ describe("detectIntent", () => {
 
 describe("detectCategories", () => {
   it("extracts project + technology categories", () => {
-    const cats = detectCategories("what technologies did I pick for the project");
+    const cats = detectCategories("which software did I pick for the project");
     expect(cats).toContain("project");
     expect(cats).toContain("technology");
   });
@@ -108,7 +108,7 @@ describe("resolveReferences", () => {
 
 describe("analyzeQuery", () => {
   it("returns a full analysis for a project question", () => {
-    const a = analyzeQuery("what was the original plan for this project?");
+    const a = analyzeQuery("what is the status of the project");
     expect(a.intent).toBe("project_summary");
     expect(a.answerFormat).toBe("summary");
     expect(a.requiresClarification).toBe(false);
