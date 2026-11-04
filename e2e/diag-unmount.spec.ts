@@ -5,12 +5,15 @@ test('diag: capture unmount stack', async ({ page }) => {
   page.on('console', (msg) => {
     if (msg.type() === 'error' && msg.text().includes('unmount a root')) {
       hits.push(`CONSOLE: ${msg.text()}`)
+      hits.push(`LOCATION: ${JSON.stringify(msg.location())}`)
+      const stack = msg.stack()
+      if (stack) hits.push(`STACK: ${stack.slice(0, 1200)}`)
     }
   })
   page.on('pageerror', (err) => {
     if (String(err).includes('unmount a root')) {
       hits.push(`PAGEERROR: ${String(err)}`)
-      hits.push(`STACK: ${err.stack?.split('\n').slice(0, 8).join('\n') ?? 'n/a'}`)
+      hits.push(`STACK: ${err.stack?.split('\n').slice(0, 12).join('\n') ?? 'n/a'}`)
     }
   })
   await page.goto('/')
