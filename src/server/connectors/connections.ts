@@ -7,6 +7,7 @@
  * snake_case DB columns to the camelCase ConnectionRecord contract.
  */
 import { queryTenant } from "@/db/client";
+import { userHasWorkspaceAccess } from "@/server/data/workspaces";
 import { encryptSecret } from "./crypto";
 import { revokeAuthorization } from "./oauth";
 import type {
@@ -113,6 +114,9 @@ export async function getConnection(
   workspaceId: string,
   connectionId: string,
 ): Promise<ConnectionRecord | null> {
+  if (!(await userHasWorkspaceAccess(userId, workspaceId))) {
+    return null;
+  }
   const rows = await queryTenant<ConnectionRow>(
     userId,
     `SELECT id, workspace_id, owner_id, provider, external_account_id,
@@ -131,6 +135,9 @@ export async function listConnections(
   userId: string,
   workspaceId: string,
 ): Promise<ConnectionRecord[]> {
+  if (!(await userHasWorkspaceAccess(userId, workspaceId))) {
+    return [];
+  }
   const rows = await queryTenant<ConnectionRow>(
     userId,
     `SELECT id, workspace_id, owner_id, provider, external_account_id,
@@ -228,6 +235,9 @@ export async function getTokenRow(
   workspaceId: string,
   connectionId: string,
 ): Promise<{ accessTokenEnc: string; refreshTokenEnc: string | null; expiresAt: string | null; scope: string[] } | null> {
+  if (!(await userHasWorkspaceAccess(userId, workspaceId))) {
+    return null;
+  }
   const rows = await queryTenant<TokenRow>(
     userId,
     `SELECT ct.access_token_enc, ct.refresh_token_enc, ct.expires_at, ct.scope
