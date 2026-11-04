@@ -22,7 +22,8 @@ describe("detectIntent", () => {
     expect(detectIntent("how does my current approach compare to before")).toBe("temporal_comparison");
   });
   it("classifies historical questions", () => {
-    expect(detectIntent("what was I working on last month")).toBe("historical");
+    // detectIntent expects a normalized (lowercased) query — analyzeQuery does this.
+    expect(detectIntent("what was i working on last month")).toBe("historical");
   });
   it("classifies project summaries", () => {
     expect(detectIntent("what is the status of the project")).toBe("project_summary");
