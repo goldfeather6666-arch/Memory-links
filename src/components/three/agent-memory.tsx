@@ -9,6 +9,7 @@
  */
 
 import { Canvas, useFrame } from '@react-three/fiber';
+import { CanvasMountGate } from './canvas-mount-gate';
 import { Html } from '@react-three/drei';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
@@ -217,6 +218,7 @@ export default function AgentMemory() {
   const { ref, inView } = useInView<HTMLDivElement>();
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas
         camera={{ position: [0, 0.6, 7.6], fov: 50 }}
         gl={{ antialias: true, alpha: true }}
@@ -226,6 +228,7 @@ export default function AgentMemory() {
       >
         <SceneContent />
       </Canvas>
+      </CanvasMountGate>
     </div>
   );
 }
