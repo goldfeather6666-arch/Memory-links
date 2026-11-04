@@ -177,13 +177,13 @@ function InstancedNodes({
     applyNodeDim(selectedIndex);
   }, [selectedIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handlePointerOver = (instanceId: number | null) => {
+  const handlePointerOver = (instanceId: number | undefined) => {
     if (instanceId == null) return;
     const id = [...indexById.keys()].find((k) => indexById.get(k) === instanceId);
     onHovered(id ?? null);
   };
 
-  const handleClick = (instanceId: number | null) => {
+  const handleClick = (instanceId: number | undefined) => {
     if (instanceId == null) return;
     const id = [...indexById.keys()].find((k) => indexById.get(k) === instanceId);
     if (id == null) return;
