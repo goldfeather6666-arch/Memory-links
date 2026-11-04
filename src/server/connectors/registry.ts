@@ -266,8 +266,7 @@ export function listConnectors(): ConnectorDescriptor[] {
 /**
  * True when the environment has the OAuth client credentials required to
  * connect this provider. RSS needs no OAuth and is always available.
- * OneDrive has no Microsoft env vars yet; it is treated as configured only
- * when the connector encryption secret is present (placeholder client).
+ * OneDrive requires the Microsoft v2.0 OAuth client credentials.
  */
 export function isProviderConfigured(provider: ProviderId): boolean {
   const env = getServerEnv();
@@ -296,7 +295,9 @@ export function isProviderConfigured(provider: ProviderId): boolean {
         env.DROPBOX_OAUTH_APP_KEY && env.DROPBOX_OAUTH_APP_SECRET,
       );
     case "onedrive":
-      return Boolean(env.CONNECTOR_ENCRYPTION_SECRET && env.GOOGLE_OAUTH_CLIENT_ID);
+      return Boolean(
+        env.MICROSOFT_OAUTH_CLIENT_ID && env.MICROSOFT_OAUTH_CLIENT_SECRET,
+      );
     default:
       return false;
   }
