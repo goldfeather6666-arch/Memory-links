@@ -40,7 +40,7 @@ export function ForgotPasswordForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Check your email</CardTitle>
+          <CardTitle as="h1">Check your email</CardTitle>
           <CardDescription>
             If an account exists for that address, we sent a password reset link. It expires in 24 hours.
           </CardDescription>
@@ -55,7 +55,7 @@ export function ForgotPasswordForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Forgot password</CardTitle>
+        <CardTitle as="h1">Forgot password</CardTitle>
         <CardDescription>Enter your account email and we&apos;ll send you a reset link.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
