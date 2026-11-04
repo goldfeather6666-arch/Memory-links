@@ -19,9 +19,16 @@ export interface ActionResult {
 }
 
 function unpackError(e: unknown): string {
-  return e instanceof Error && e.message === "FORBIDDEN"
-    ? "You don't have access to this workspace."
-    : "Something went wrong. Please try again.";
+  if (e instanceof Error && e.message === "FORBIDDEN") {
+    return "You don't have access to this workspace.";
+  }
+  const msg = e instanceof Error ? e.message : "";
+  const connHints =
+    /ECONNREFUSED|ENETUNREACH|ETIMEDOUT|connection refused|timeout|terminated|pipeline|cannot reach|self-signed|agent\(/i;
+  if (connHints.test(msg)) {
+    return "The database is unreachable right now. Please try again in a moment.";
+  }
+  return "Something went wrong. Please try again.";
 }
 
 export async function createWorkspaceAction(input: {
