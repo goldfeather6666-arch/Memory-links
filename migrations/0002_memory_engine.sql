@@ -68,13 +68,8 @@ ALTER TABLE memory_records ADD COLUMN IF NOT EXISTS state text NOT NULL DEFAULT 
 ALTER TABLE memory_records ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
 ALTER TABLE memory_records ADD COLUMN IF NOT EXISTS embedding_model text;
 ALTER TABLE memory_records ADD COLUMN IF NOT EXISTS embedding_dim integer;
-ALTER TABLE memory_records ADD COLUMN IF NOT EXISTS search_vector tsvector
-  GENERATED ALWAYS AS (
-    setweight(to_tsvector('english', coalesce(content, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(summary, '')), 'B')
-  ) STORED;
-
-CREATE INDEX IF NOT EXISTS idx_memory_search ON memory_records USING gin (search_vector);
+CREATE INDEX IF NOT EXISTS idx_memory_search
+  ON memory_records USING gin (to_tsvector('english', content || ' ' || coalesce(summary, '')));
 CREATE INDEX IF NOT EXISTS idx_memory_state ON memory_records(workspace_id, state);
 CREATE INDEX IF NOT EXISTS idx_memory_version ON memory_records(workspace_id, version);
 
