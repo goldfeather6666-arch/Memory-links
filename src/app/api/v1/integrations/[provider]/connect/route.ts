@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
-import { getProvider } from "@/server/connectors/registry";
+import { PROVIDERS } from "@/server/connectors/registry";
 import { buildAuthorizeUrl } from "@/server/connectors/oauth";
 import type { ProviderId } from "@/server/connectors/types";
 
@@ -39,12 +39,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ provider: 
     // Missing/empty body is acceptable; redirectTo stays undefined.
   }
 
-  if (!getProvider(provider)) {
+  const providerId = provider as ProviderId;
+  if (!PROVIDERS.some((p) => p.provider === providerId)) {
     return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
   }
 
   try {
-    const url = await buildAuthorizeUrl(session.id, workspaceId, provider as ProviderId, redirectTo);
+    const url = await buildAuthorizeUrl(session.id, workspaceId, providerId, redirectTo);
     return NextResponse.json({ url });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
