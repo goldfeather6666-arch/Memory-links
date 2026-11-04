@@ -52,8 +52,8 @@ export async function createIngestion(
     userId,
     `INSERT INTO ingestion_records (
         workspace_id, owner_id, source_type, source_id, title, checksum,
-        content_preview, content_ref, size_bytes, status, metadata
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', $10)
+        content, content_preview, content_ref, size_bytes, status, metadata
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11)
      RETURNING ${INGESTION_COLUMNS}`,
     [
       input.workspaceId,
@@ -62,6 +62,7 @@ export async function createIngestion(
       input.sourceId ?? null,
       input.title ? truncate(input.title, 300) : null,
       checksum,
+      pre.content,
       pre.preview,
       null,
       pre.sizeBytes,
