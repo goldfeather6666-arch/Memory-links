@@ -7,7 +7,7 @@ function makeHit(overrides: Partial<RelevanceResult> = {}, id = "mem-1"): Releva
     id,
     workspaceId: "ws-1",
     ownerId: "u-1",
-    memoryType: "project",
+    memoryType: "episodic",
     state: "active",
     content: "We planned to build with Next.js and Postgres.",
     summary: "Original project plan",
@@ -32,7 +32,7 @@ describe("toRetrievedEvidence", () => {
     const ev = toRetrievedEvidence(makeHit());
     expect(ev.id).toBe("mem-1");
     expect(ev.kind).toBe("memory");
-    expect(ev.type).toBe("project");
+    expect(ev.type).toBe("episodic");
     expect(ev.label).toBe("Original project plan");
     expect(ev.summary).toBe("Original project plan");
     expect(ev.confidence).toBe(0.9);
