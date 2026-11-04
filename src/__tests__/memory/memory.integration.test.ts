@@ -57,7 +57,7 @@ describe.skipIf(!hasDb)("memory engine integration", () => {
     const { queryTenant, a, b, ws } = await setup();
     const { createIngestion } = await import("@/server/memory/ingestion");
 
-    const input = { workspaceId: ws.id, sourceType: "note", content: "same content", title: "t" };
+    const input = { workspaceId: ws.id, sourceType: "note" as const, content: "same content", title: "t" };
     const one = await createIngestion(a.id, input);
     const two = await createIngestion(a.id, input);
     expect(two.id).toBe(one.id);
