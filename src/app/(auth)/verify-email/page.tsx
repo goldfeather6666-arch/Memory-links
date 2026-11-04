@@ -15,7 +15,7 @@ export default async function VerifyEmailPage({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Verification link invalid</CardTitle>
+          <CardTitle as="h1">Verification link invalid</CardTitle>
           <CardDescription>This link is missing its verification token.</CardDescription>
         </CardHeader>
       </Card>
@@ -27,7 +27,7 @@ export default async function VerifyEmailPage({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{result.ok ? "Email verified" : "Verification failed"}</CardTitle>
+        <CardTitle as="h1">{result.ok ? "Email verified" : "Verification failed"}</CardTitle>
         <CardDescription>
           {result.ok
             ? "Your email is confirmed. You can now sign in."
