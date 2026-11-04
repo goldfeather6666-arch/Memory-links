@@ -3,6 +3,7 @@ import { listWorkspacesForUser } from "@/server/data/workspaces";
 import { listConversations } from "@/server/conversations/data";
 import { ChatApp } from "@/components/app/chat/chat-app";
 import type { ConversationRecord } from "@/server/conversations/types";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export default async function ChatPage() {
   const workspaces = await listWorkspacesForUser(session.id);
   if (workspaces.length === 0) return null;
   const workspaceId = workspaces[0].workspace.id;
+  const isDemo = workspaces[0].workspace.settings?.is_demo === true;
   let initialConversations: ConversationRecord[] = [];
   try {
     const result = await listConversations(session.id, workspaceId, {
@@ -23,6 +25,9 @@ export default async function ChatPage() {
     // conversation list is best-effort
   }
   return (
-    <ChatApp workspaceId={workspaceId} initialConversations={initialConversations} />
+    <>
+      {isDemo && <DemoBanner />}
+      <ChatApp workspaceId={workspaceId} initialConversations={initialConversations} />
+    </>
   );
 }
