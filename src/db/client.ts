@@ -1,5 +1,5 @@
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
-import { serverEnv } from "@/lib/env";
+import { getServerEnv } from "@/lib/env";
 
 let pool: Pool | null = null;
 
@@ -7,7 +7,7 @@ let pool: Pool | null = null;
 export function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
-      connectionString: serverEnv.DATABASE_URL,
+      connectionString: getServerEnv().DATABASE_URL,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
