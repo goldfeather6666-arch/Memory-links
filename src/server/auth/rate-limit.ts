@@ -15,7 +15,8 @@ export type AuthAction =
   | "signup"
   | "forgot-password"
   | "reset-password"
-  | "verify-email";
+  | "verify-email"
+  | "resend-verification";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -31,6 +32,7 @@ const MAX_ATTEMPTS: Record<AuthAction, number> = {
   signup: 5,
   "reset-password": 5,
   "verify-email": 5,
+  "resend-verification": 5,
 };
 
 function lockoutMs(level: number): number {
