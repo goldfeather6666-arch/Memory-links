@@ -119,6 +119,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       content: result.answer.content,
       status: "completed",
       evidence: result.answer.evidence,
+      context: {
+        projects: result.context.projects,
+        entities: result.context.entities,
+        timelineEvents: result.context.timelineEvents,
+        intent: result.context.analysis.intent,
+      },
       tokens:
         result.answer.usage.inputTokens + result.answer.usage.outputTokens || null,
       clientRequestId: body.clientRequestId ? `${body.clientRequestId}:assistant` : null,
