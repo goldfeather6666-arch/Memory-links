@@ -8,6 +8,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   bearerAuth,
   coerceTimestamp,
@@ -35,7 +36,7 @@ function headers(accessToken: string): Record<string, string> {
   };
 }
 
-function toRepoSource(repo: Record<string, unknown>): NormalizedSource {
+function toRepoSource(repo: Record<string, unknown>): RawSource {
   return {
     externalId: typeof repo.id === "number" ? String(repo.id) : String(repo.id ?? ""),
     recordType: "repository",
@@ -52,7 +53,7 @@ function toRepoSource(repo: Record<string, unknown>): NormalizedSource {
   };
 }
 
-function toIssueSource(issue: Record<string, unknown>, repoFullName: string): NormalizedSource {
+function toIssueSource(issue: Record<string, unknown>, repoFullName: string): RawSource {
   const user = issue.user as Record<string, unknown> | undefined;
   return {
     externalId: typeof issue.id === "number" ? String(issue.id) : String(issue.id ?? ""),
@@ -84,7 +85,7 @@ async function fetchRepos(
   accessToken: string,
   cursor?: string | null,
   limit?: number,
-): Promise<{ items: NormalizedSource[]; nextCursor: string | null }> {
+): Promise<{ items: RawSource[]; nextCursor: string | null }> {
   const page = cursor ? Math.max(1, parseInt(cursor, 10) || 1) : 1;
   const qs = new URLSearchParams({ per_page: String(pageLimit(limit)), page: String(page) });
   const res = await fetch(`${API_BASE}/user/repos?${qs.toString()}`, {
@@ -99,7 +100,7 @@ async function fetchRepos(
 async function fetchRepoIssues(
   accessToken: string,
   fullName: string,
-): Promise<NormalizedSource[]> {
+): Promise<RawSource[]> {
   const qs = new URLSearchParams({ state: "all", per_page: "100", page: "1" });
   const res = await fetch(
     `${API_BASE}/repos/${encodeURIComponent(fullName)}/issues?${qs.toString()}`,
@@ -134,7 +135,7 @@ export const githubAdapter: ConnectorAdapter = {
     );
 
     // Enumerate a bounded set of first-page issues only on the first page.
-    let issueItems: NormalizedSource[] = [];
+    let issueItems: RawSource[] = [];
     if (!params.cursor) {
       const targets = repoItems
         .map((r) => r.metadata?.full_name)
