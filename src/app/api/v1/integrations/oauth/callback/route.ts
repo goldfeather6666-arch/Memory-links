@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerEnv } from "@/lib/env";
 import { queryTenant } from "@/db/client";
 import { handleOAuthCallback } from "@/server/connectors/oauth";
+import type { ProviderId } from "@/server/connectors/types";
 
 /**
  * GET /api/v1/integrations/oauth/callback?code=...&state=...
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${redirectBase}?error=invalid_state`);
     }
 
-    await handleOAuthCallback(provider, code, state);
+    await handleOAuthCallback(provider as ProviderId, code, state);
     return NextResponse.redirect(`${redirectBase}?connected=ok`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
