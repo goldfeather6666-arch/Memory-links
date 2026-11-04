@@ -236,6 +236,6 @@ describe("CSV builders", () => {
     const edges = [makeEdge()];
     const csv = buildCsvEdges(edges);
     expect(csv.split("\n")[0]).toBe("id,source,target,type,directed,strength,confidence,createdAt");
-    expect(csv).toContain("related_to,false,0.6000,0.6");
+    expect(csv).toContain('"rel:r1","memory:m1","memory:m2","related_to",false,0.6000,0.6');
   });
 });
