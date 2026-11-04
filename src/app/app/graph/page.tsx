@@ -3,6 +3,7 @@ import { listWorkspacesForUser } from "@/server/data/workspaces";
 import { getGraphMetrics, type GraphMetrics } from "@/server/intelligence/graph";
 import { GraphExplorer } from "@/components/app/graph/graph-explorer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function GraphPage({
   const active =
     workspaces.find((w) => w.workspace.id === workspace) ?? workspaces[0];
   const workspaceId = active.workspace.id;
+  const isDemo = active.workspace.settings?.is_demo === true;
 
   let metrics: GraphMetrics | null = null;
   try {
@@ -51,6 +53,7 @@ export default async function GraphPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+      {isDemo && <DemoBanner />}
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold text-soft-white">Knowledge Graph</h1>
