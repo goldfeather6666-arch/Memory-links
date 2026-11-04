@@ -68,7 +68,9 @@ export async function POST(req: NextRequest) {
     const b = (body ?? {}) as Record<string, unknown>;
     const nodeIds = Array.isArray(b.nodeIds) ? (b.nodeIds as unknown[]).map(String) : [];
     const edgeIds = Array.isArray(b.edgeIds) ? (b.edgeIds as unknown[]).map(String) : [];
-    const filter = typeof b.filter === "object" && b.filter !== null ? b.filter : {};
+    const filter = (typeof b.filter === "object" && b.filter !== null
+      ? b.filter
+      : {}) as Record<string, unknown>;
 
     const snapshot = await createSnapshot(session.id, workspaceId, {
       name: String(b.name ?? "Snapshot"),
