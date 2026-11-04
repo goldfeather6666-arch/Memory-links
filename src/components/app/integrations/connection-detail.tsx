@@ -545,7 +545,7 @@ export function ConnectionDetail({
           <p className="text-sm text-slate">No resources selected.</p>
         ) : (
           <ul className="space-y-2">
-            {connection.selectedResources.map((r) => (
+            {connection.selectedResources.map((r, index) => (
               <li key={r.id ?? String(index)} className="rounded-xl border border-soft-white/10 px-4 py-2.5">
                 <span className="text-sm text-soft-white">{RESOURCE_LABEL(r) || r.id}</span>
                 {r.type && <Badge variant="subtle" className="ml-2">{r.type}</Badge>}
