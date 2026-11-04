@@ -83,8 +83,23 @@ async function provisionUserRow(user: User): Promise<void> {
 async function provisionDemoWorkspace(userId: string): Promise<void> {
   try {
     await ensureDemoWorkspace(userId);
-  } catch {
-    // Non-fatal: demo provisioning must never block auth.
+  } catch (err) {
+    // Non-fatal: demo provisioning must never block auth. But never stay
+    // silent — surface the cause to the runtime log so the next deploy can
+    // be diagnosed (RLS, FK, connectivity, etc.).
+    console.error(`[demo-provision] failed for user ${userId}`, err);
+    try {
+      await recordAuditEvent({
+        actorId: userId,
+        action: "demo.provision_failed",
+        entityType: "workspace",
+        metadata: {
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
+    } catch {
+      // audit must never mask the original provisioning error
+    }
   }
 }
 
