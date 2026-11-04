@@ -27,7 +27,15 @@ export default async function CommandCenterPage({
   if (!session) redirect("/signin");
 
   const params = await searchParams;
-  const workspaces = await listWorkspacesForUser(session.id);
+
+  let workspaces: WorkspaceWithRole[];
+  try {
+    workspaces = await listWorkspacesForUser(session.id);
+  } catch {
+    // Data tier unreachable (e.g. DB down / not configured): degrade gracefully
+    // instead of crashing the authenticated command center.
+    return <DataUnavailable />;
+  }
 
   if (workspaces.length === 0) {
     return <NoWorkspace />;
@@ -149,6 +157,27 @@ export default async function CommandCenterPage({
             </Link>
           ))}
         </div>
+      </Card>
+    </div>
+  );
+}
+
+function DataUnavailable() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Memory data is unavailable right now</CardTitle>
+          <CardDescription>
+            You are signed in, but the memory database could not be reached.
+            This is usually a temporary connection issue. Try again in a moment.
+          </CardDescription>
+        </CardHeader>
+        <EmptyState
+          icon={<Icon name="spark" size={28} />}
+          title="Database unavailable"
+          description="Your data will load again once the database connection is restored."
+        />
       </Card>
     </div>
   );
