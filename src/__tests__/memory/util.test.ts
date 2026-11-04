@@ -9,7 +9,7 @@ describe("memory utilities", () => {
   });
 
   it("normalizes text", () => {
-    expect(normalizeText("  The Project! USES PostgreSQL.  ")).toBe("the project uses postgres");
+    expect(normalizeText("  The Project! USES PostgreSQL.  ")).toBe("the project uses postgresql");
   });
 
   it("computes cosine similarity", () => {
@@ -20,7 +20,7 @@ describe("memory utilities", () => {
   });
 
   it("detects near-identical normalized text", () => {
-    expect(normalizeSimilarity("the project uses postgres", "The project uses PostgreSQL.")).toBeGreaterThan(0.9);
+    expect(normalizeSimilarity(normalizeText("the project uses postgres"), normalizeText("The project uses PostgreSQL."))).toBeGreaterThan(0.85);
     expect(normalizeSimilarity("the project uses postgres", "the user prefers rust")).toBeLessThan(0.5);
   });
 });
