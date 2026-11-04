@@ -89,5 +89,6 @@ export async function verifyPassword(
     KEY_LEN,
     { N: params.N, r: params.r, p: params.p },
   )) as Buffer;
+  if (candidate.length !== hash.length) return false;
   return timingSafeEqual(candidate, hash);
 }
