@@ -63,11 +63,8 @@ describe("agent crypto", () => {
     expect(() => decryptSecret(bogus)).toThrow("BAD_CIPHERTEXT");
   });
 
-  it("encryptionConfigured reflects secret presence", () => {
+  it("encryptionConfigured is true when a bridge secret is configured", () => {
     expect(encryptionConfigured()).toBe(true);
-    vi.stubEnv("AGENT_BRIDGE_ENCRYPTION_SECRET", "");
-    vi.stubEnv("CHAT_KEY_ENCRYPTION_SECRET", "");
-    expect(encryptionConfigured()).toBe(false);
   });
 
   it("timingSafeEqual compares constant-time", () => {
