@@ -586,7 +586,7 @@ export async function projectGraph(
 
   const expand = (start: Set<string>, depth: number) => {
     let frontier = start;
-    let current = new Set(frontier);
+    const current = new Set(frontier);
     for (let d = 0; d < depth; d++) {
       const next = new Set<string>();
       for (const id of frontier) {
