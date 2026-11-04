@@ -39,12 +39,12 @@ export default async function MemoryDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl p-6 lg:p-8">
-      <Link href=app/vault" className="text-sm text-slate hover:text-soft-white">← Back to Vault</Link>
+      <Link href="/app/vault" className="text-sm text-slate hover:text-soft-white">← Back to Vault</Link>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <h1 className="text-2xl font-semibold text-soft-white">Memory details</h1>
         <Badge>{memory.memoryType}</Badge>
-        <Badge variant="secondary">{memory.state}</Badge>
+        <Badge variant="subtle">{memory.state}</Badge>
         <span className="text-xs text-slate">version {memory.version}</span>
       </div>
 
