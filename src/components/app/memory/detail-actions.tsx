@@ -20,7 +20,7 @@ interface DetailActionsProps {
   initialConfidence: number | null;
 }
 
-const MEMORY_TYPES = ["episodic", "semantic", "procedural", "associative"];
+const MEMORY_TYPES = ["episodic", "semantic", "procedural", "associative"] as const;
 
 export function DetailActions({
   memoryId,
