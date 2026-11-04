@@ -30,12 +30,12 @@ CREATE TABLE IF NOT EXISTS entity_aliases (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id  uuid NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
   alias      text NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (entity_id, lower(alias))
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_entities_workspace_type ON entities(workspace_id, entity_type);
 CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(lower(canonical_name));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_entity_aliases_unique ON entity_aliases(entity_id, lower(alias));
 CREATE INDEX IF NOT EXISTS idx_entity_aliases_alias ON entity_aliases(lower(alias));
 
 ALTER TABLE memory_relationships ADD COLUMN IF NOT EXISTS provenance jsonb NOT NULL DEFAULT '{}'::jsonb;
