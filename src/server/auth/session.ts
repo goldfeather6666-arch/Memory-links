@@ -2,9 +2,8 @@ import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { queryTenant } from "@/db/client";
 import type { Session, User } from "@/db/schema";
-import { serverEnv } from "@/lib/env";
-
-export const SESSION_COOKIE = "mn_min_session";
+import { getServerEnv } from "@/lib/env";
+import { SESSION_COOKIE } from "@/server/auth/constants";
 
 function sha256(input: string): string {
   return createHash("sha256").update(input).digest("hex");
@@ -25,7 +24,7 @@ export interface SessionUser extends User {
 export async function createSession(userId: string): Promise<string> {
   const token = generateToken();
   const tokenHash = sha256(token);
-  const ttlDays = serverEnv.SESSION_TTL_DAYS;
+  const ttlDays = getServerEnv().SESSION_TTL_DAYS;
   await queryTenant(userId, `INSERT INTO sessions (user_id, token_hash, expires_at)
     VALUES ($1, $2, now() + make_interval(days => $3))`, [
     userId,
