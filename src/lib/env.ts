@@ -33,6 +33,11 @@ const serverEnvSchema = z.object({
   CHAT_MODEL_SMALL: z.string().default("gpt-4o-mini"),
   CHAT_MODEL_LARGE: z.string().default("gpt-4o"),
   CHAT_KEY_ENCRYPTION_SECRET: z.string().optional(),
+  /** Part 7 agent bridge — server-only secret for encrypting agent/webhook
+   * secrets at rest and per-agent API rate limit + context caps. */
+  AGENT_BRIDGE_ENCRYPTION_SECRET: z.string().optional(),
+  AGENT_API_RATE_LIMIT: z.coerce.number().int().positive().default(120),
+  AGENT_CONTEXT_MAX_MEMORIES: z.coerce.number().int().positive().default(40),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
