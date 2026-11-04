@@ -207,7 +207,10 @@ export function registerAllTools(server: McpServer, principal: AgentPrincipal | 
     confidence: z.number().min(0).max(1).optional(),
     validFrom: z.string().nullable().optional(),
     validUntil: z.string().nullable().optional(),
-    entities: z.array(z.object({ name: z.string().min(1), type: z.string().optional() })).optional(),
+    entities: z
+      .array(z.object({ name: z.string().min(1), type: z.string().optional() }))
+      .maxItems(100)
+      .optional(),
   };
 
   server.registerTool(
