@@ -9,9 +9,13 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
   return <div className={cn("mb-3", className)} {...props} />;
 }
 
-export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
+export function CardTitle({
+  className,
+  as: Tag = "h3",
+  ...props
+}: HTMLAttributes<HTMLHeadingElement> & { as?: "h1" | "h2" | "h3" }) {
   return (
-    <h3
+    <Tag
       className={cn("text-base font-semibold text-soft-white", className)}
       {...props}
     />
