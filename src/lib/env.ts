@@ -9,6 +9,12 @@ import { z } from "zod";
  */
 const serverEnvSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  /** Supabase Auth (hosted) — when configured, auth routes no longer require
+   * DATABASE_URL and use Supabase Auth as the single source of truth for
+   * sign-in/sign-up/session. URL + publishable key only. */
+  SUPABASE_URL: z.string().optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
+  SUPABASE_ANON_KEY: z.string().optional(),
   APP_URL: z.string().url().default("http://localhost:3000"),
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
   SMTP_HOST: z.string().optional(),
@@ -103,3 +109,20 @@ export const publicEnv = {
     process.env.APP_URL ||
     "http://localhost:3000",
 } as const;
+
+/**
+ * True when Supabase Auth is configured (URL + publishable key). Used by auth
+ * routes to decide whether to route through Supabase Auth instead of the
+ * legacy DB-backed path.
+ */
+export function isSupabaseConfigured(): boolean {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY;
+  return Boolean(url && url.trim() && key && key.trim());
+}
