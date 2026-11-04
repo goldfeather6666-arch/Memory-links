@@ -321,7 +321,7 @@ export async function listMemories(
   opts: ListMemoriesOptions = {},
 ): Promise<{ items: MemoryView[]; total: number }> {
   if (!(await userHasWorkspaceAccess(userId, workspaceId))) {
-    throw new Error("FORBIDDEN");
+    return { items: [], total: 0 };
   }
   const types = opts.memoryTypes?.length ? opts.memoryTypes : null;
   const states = opts.states?.length ? opts.states : ["active"];
