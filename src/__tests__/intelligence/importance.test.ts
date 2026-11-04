@@ -22,7 +22,7 @@ describe("scoreImportance", () => {
     expect(d.importance).toBeGreaterThanOrEqual(0);
     expect(d.importance).toBeLessThanOrEqual(1);
     expect(Array.isArray(d.explanation.factors)).toBe(true);
-    expect(d.explanation.factors.length).toBeGreatThan(0);
+    expect(d.explanation.factors.length).toBeGreaterThan(0);
     expect(typeof d.explanation.summary).toBe("string");
   });
 
