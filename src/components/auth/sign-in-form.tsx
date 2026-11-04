@@ -44,7 +44,7 @@ export function SignInForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
+        <CardTitle as="h1">Welcome back</CardTitle>
         <CardDescription>Sign in to your MNEMOSYNE workspace.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
