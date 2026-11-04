@@ -9,6 +9,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   bearerAuth,
   coerceTimestamp,
@@ -24,7 +25,7 @@ import type {
 
 const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
 
-function toOneDriveSource(item: Record<string, unknown>): NormalizedSource {
+function toOneDriveSource(item: Record<string, unknown>): RawSource {
   const file = item.file as Record<string, unknown> | undefined;
   return {
     externalId: typeof item.id === "string" ? item.id : String(item.id ?? ""),
