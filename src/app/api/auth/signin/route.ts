@@ -4,6 +4,7 @@ import { createSession } from "@/server/auth/session";
 import { SESSION_COOKIE } from "@/server/auth/constants";
 import { signinSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+import { getServerEnv } from "@/lib/env";
 
 function emailFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) return null;
@@ -53,8 +54,9 @@ export async function POST(req: Request) {
     { status: 200 },
   );
 
-  // Secure httpOnly session cookie.
-  const days = 30;
+  // Secure httpOnly session cookie, honoring the configured session TTL
+  // (SESSION_TTL_DAYS) instead of a hardcoded 30 days.
+  const ttlDays = getServerEnv().SESSION_TTL_DAYS;
   response.cookies.set({
     name: SESSION_COOKIE,
     value: token,
@@ -62,7 +64,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    expires: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+    expires: new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000),
   });
 
   return response;
