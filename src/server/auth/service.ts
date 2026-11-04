@@ -1,5 +1,5 @@
 import { hashPassword, verifyPassword } from "@/server/auth/password";
-import { createSession, destroySession } from "@/server/auth/session";
+import { destroySession } from "@/server/auth/session";
 import { recordAuditEvent } from "@/server/data/audit";
 import {
   createAuthToken,
