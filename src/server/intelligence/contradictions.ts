@@ -20,6 +20,7 @@ import { clamp01, cosineSimilarity, normalizeText, truncate } from "@/server/mem
 import { CONTRADICTION_SELECT, mapContradictionRow } from "./helpers";
 import {
   CONTRADICTION_STATUSES,
+  type ContradictionCategory,
   type ContradictionRecord,
   type ContradictionStatus,
   type ConflictCandidatePair,
