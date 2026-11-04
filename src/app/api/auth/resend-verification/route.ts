@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { resendVerificationEmail } from "@/server/auth/service";
 import { emailSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+import { isDatabaseConfigured } from "@/lib/env";
 
 function emailFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) return null;
@@ -22,6 +23,13 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Email verification isn't configured for this environment yet." },
+      { status: 503 },
+    );
   }
 
   const key = emailFromBody(body) ?? getClientRequestIp(req);
