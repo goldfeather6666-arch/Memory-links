@@ -56,6 +56,20 @@ export async function checkAuthRateLimit(
   key: string,
   action: AuthAction,
 ): Promise<RateLimitResult> {
+  // If the rate-limit store (DATABASE_URL) is unavailable, fail-open so that
+  // auth can still proceed through Supabase Auth. This keeps sign-in/sign-up
+  // functional even when the data storage tier is unreachable.
+  try {
+    return await checkAuthRateLimitInner(key, action);
+  } catch {
+    return { allowed: true };
+  }
+}
+
+async function checkAuthRateLimitInner(
+  key: string,
+  action: AuthAction,
+): Promise<RateLimitResult> {
   const maxAttempts = MAX_ATTEMPTS[action] ?? 5;
 
   // Ensure a row exists for (key, action); ON CONFLICT is a no-op when present.
