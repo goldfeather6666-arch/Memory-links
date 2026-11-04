@@ -80,6 +80,7 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [timelineAt, setTimelineAt] = useState<string | null>(null);
+  const [nowIso] = useState(() => new Date().toISOString());
 
   const [projection, setProjection] = useState<Projection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -438,8 +439,8 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
           <input
             type="range"
             min={Math.min(...projection.nodes.map((n) => Date.parse(n.createdAt) || 0))}
-            max={Date.now()}
-            value={timelineAt ? Date.parse(timelineAt) : Date.now()}
+            max={Date.parse(nowIso)}
+            value={timelineAt ? Date.parse(timelineAt) : Date.parse(nowIso)}
             onChange={(e) => setTimelineAt(new Date(Number(e.target.value)).toISOString())}
             className="accent-violet"
           />
