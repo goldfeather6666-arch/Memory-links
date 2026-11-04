@@ -28,6 +28,11 @@ const serverEnvSchema = z.object({
   EMBEDDING_DIM: z.coerce.number().int().positive().default(1536),
   /** Part 4 intelligence — secret guarding the protected cron/trigger route. */
   INTELLIGENCE_CRON_SECRET: z.string().optional(),
+  /** Part 6 conversational AI — optional chat provider + BYOK encryption. */
+  CHAT_PROVIDER: z.enum(["openai"]).optional(),
+  CHAT_MODEL_SMALL: z.string().default("gpt-4o-mini"),
+  CHAT_MODEL_LARGE: z.string().default("gpt-4o"),
+  CHAT_KEY_ENCRYPTION_SECRET: z.string().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
