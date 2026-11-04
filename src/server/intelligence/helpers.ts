@@ -3,7 +3,7 @@
  * lists consistent across modules and maps snake_case rows to camelCase types.
  */
 
-import type { Record as PgRow } from "pg";
+import type { QueryResultRow as PgRow } from "pg";
 import type {
   ContradictionRecord,
   ConsolidationRecord,
