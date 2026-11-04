@@ -1,7 +1,17 @@
-import { randomBytes, scrypt, timingSafeEqual } from "crypto";
-import { promisify } from "util";
+import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "crypto";
 
-const scryptAsync = promisify(scrypt);
+function scryptAsync(
+  password: string | Buffer,
+  salt: string | Buffer,
+  keylen: number,
+  options: ScryptOptions,
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    scrypt(password, salt, keylen, options, (err, key) =>
+      err ? reject(err) : resolve(key),
+    );
+  });
+}
 
 /**
  * Format: scrypt$N$r$p$salt$hash (base64url). Every field in the header is a
