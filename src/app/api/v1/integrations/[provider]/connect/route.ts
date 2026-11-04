@@ -3,6 +3,7 @@ import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
 import { getProvider } from "@/server/connectors/registry";
 import { buildAuthorizeUrl } from "@/server/connectors/oauth";
+import type { ProviderId } from "@/server/connectors/types";
 
 /**
  * POST /api/v1/integrations/:provider/connect?ws=<workspaceId>
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ provider: 
   }
 
   try {
-    const url = await buildAuthorizeUrl(session.id, workspaceId, provider, redirectTo);
+    const url = await buildAuthorizeUrl(session.id, workspaceId, provider as ProviderId, redirectTo);
     return NextResponse.json({ url });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
