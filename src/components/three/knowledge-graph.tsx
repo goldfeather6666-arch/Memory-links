@@ -13,6 +13,7 @@
 
 import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { CanvasMountGate } from './canvas-mount-gate';
 import {
   useEffect,
   useMemo,
@@ -404,6 +405,7 @@ export default function KnowledgeGraph() {
 
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas
         frameloop={inView ? 'always' : 'never'}
         camera={{ position: [0, 0.6, 7.6], fov: 50 }}
@@ -422,6 +424,7 @@ export default function KnowledgeGraph() {
         {hoveredId != null && <HoverLabel id={hoveredId} />}
         <CameraRig selectedId={selectedId} />
       </Canvas>
+      </CanvasMountGate>
     </div>
   );
 }
