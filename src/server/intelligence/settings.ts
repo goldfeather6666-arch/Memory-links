@@ -102,7 +102,7 @@ function mapSettingsRow(row: Record<string, unknown>): ProcessingSettings {
   return {
     workspaceId: String(row.workspaceId),
     automaticConsolidation: Boolean(row.automaticConsolidation),
-    enabledKinds: (row.enabledKinds as string[]) ?? DEFAULT_ENABLED_KINDS,
+    enabledKinds: (row.enabledKinds as IntelligenceJobKind[]) ?? DEFAULT_ENABLED_KINDS,
     budgetCapTokens: Number(row.budgetCapTokens ?? DEFAULT_BUDGET_CAP_TOKENS),
     modelPreference: row.modelPreference ? String(row.modelPreference) : null,
     createdAt: String(row.createdAt),
