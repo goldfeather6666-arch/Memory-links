@@ -17,6 +17,7 @@ import type {
   ConnectorAdapter,
   FetchPageParams,
   FetchPageResult,
+  RawSource,
 } from "./types";
 
 function extract(value: string | undefined): string | null {
@@ -26,7 +27,7 @@ function extract(value: string | undefined): string | null {
   return decoded.length > 0 ? decoded : null;
 }
 
-function parseItems(feed: string): NormalizedSource[] {
+function parseItems(feed: string): RawSource[] {
   const items: NormalizedSource[] = [];
   // Match <item>...</item> (RSS 2.0) and <entry>...</entry> (Atom).
   const blockRe = /<(?:item|entry)(?:[^>]*)>([\s\S]*?)<\/(?:item|entry)>/gi;
