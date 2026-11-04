@@ -11,7 +11,7 @@ type CookieSet = Array<{
     domain?: string;
     secure?: boolean;
     httpOnly?: boolean;
-    sameSite?: "lax" | "strict" | "none";
+    sameSite?: boolean | "lax" | "strict" | "none";
   };
 }>;
 
