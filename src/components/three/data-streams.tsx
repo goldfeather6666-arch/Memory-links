@@ -9,6 +9,7 @@
  */
 
 import { Canvas, useFrame } from '@react-three/fiber';
+import { CanvasMountGate } from './canvas-mount-gate';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useInView } from '../../lib/hooks/use-in-view';
@@ -387,6 +388,7 @@ export default function DataStreams() {
   const { ref, inView } = useInView<HTMLDivElement>();
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas
         camera={{ position: [0, 0.4, 9.2], fov: 50 }}
         gl={{ antialias: true, alpha: true }}
@@ -396,6 +398,7 @@ export default function DataStreams() {
       >
         <SceneContent />
       </Canvas>
+      </CanvasMountGate>
     </div>
   );
 }
