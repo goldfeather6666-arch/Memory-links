@@ -1,4 +1,4 @@
-//**
+/**
  * MNEMOSYNE Part 8 — connector adapter registry.
  *
  * Maps a ProviderId to its provider adapter instance. The sync engine and
