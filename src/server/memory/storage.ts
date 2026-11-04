@@ -326,7 +326,7 @@ export async function listMemories(
   where.push(`state = ANY($${values.length})`);
   if (opts.query && opts.query.trim()) {
     values.push(opts.query.trim());
-    where.push(`search_vector @@ plainto_tsquery('english', $${values.length})`);
+    where.push(`to_tsvector('english', content || ' ' || coalesce(summary, '')) @@ plainto_tsquery('english', $${values.length})`);
   }
 
   const whereSql = where.join(" AND ");
