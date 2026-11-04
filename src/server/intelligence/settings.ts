@@ -9,6 +9,7 @@ import {
   DEFAULT_BUDGET_CAP_TOKENS,
   DEFAULT_ENABLED_KINDS,
   INTELLIGENCE_JOB_KINDS,
+  type IntelligenceJobKind,
   type ProcessingSettings,
   type SaveProcessingSettingsInput,
 } from "./types";
