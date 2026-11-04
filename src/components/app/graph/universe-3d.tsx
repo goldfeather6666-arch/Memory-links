@@ -120,13 +120,9 @@ function InstancedNodes({
       for (let i = 0; i < nodeCount; i++) mesh.setColorAt(i, colors[i]);
     } else {
       // Connected node indices for the selected node: for each edge incident
-      // to the selection, mark the other endpoint.
+      // to the selected node, mark the other endpoint.
       const connSet = new Set<number>();
-      for (const edgeIdx of adjacency[sel] ?? []) {
-        const [a, b] = edgeEndpoints[edgeIdx];
-        connSet.add(a);
-        connSet.add(b);
-      }
+      for (const i of adjacency[sel] ?? []) connSet.add(i);
       for (let i = 0; i < nodeCount; i++) {
         if (i === sel) {
           mesh.setColorAt(
