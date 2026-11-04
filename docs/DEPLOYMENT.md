@@ -58,7 +58,7 @@ Key production values to set:
 
 - **Rules:**
   - Never edit an already-applied migration — write a new numbered file.
-  - Each file must be named `NNNN_name.sql` with a zero-padded 4-digit prefix
+  - Each file must be named with a zero-padded 4-digit prefix followed by a snake_case name and `.sql` (e.g. `0009_auth_security.sql`)
     reflecting order. The CI migration gate
     (`.github/workflows/audit.yml`) enforces unique, contiguous numbering.
   - Migrations are apply-only; there is no rollback path. Back up before
