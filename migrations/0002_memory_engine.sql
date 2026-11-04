@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS ingestion_records (
   source_id      text,
   title          text,
   checksum       text NOT NULL,
+  content        text NOT NULL,
   content_preview text NOT NULL,
   content_ref    text,
   size_bytes     bigint NOT NULL DEFAULT 0,
