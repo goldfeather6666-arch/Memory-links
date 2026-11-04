@@ -5,6 +5,7 @@ import { embedMemory } from "@/server/memory/embeddings";
 import { isRetryableError } from "@/server/memory/errors";
 import { createIngestion, requireValidIngestionInput } from "@/server/memory/ingestion";
 import { JOB_CONCURRENCY } from "@/server/memory/constants";
+import { processConnectorSyncJob } from "@/server/connectors/jobs";
 import type { IngestionInput, IngestionRecord } from "@/server/memory/types";
 
 /**
@@ -19,6 +20,8 @@ async function processJob(job: JobRecord): Promise<void> {
     await runExtractionJob(job.ownerId, job.targetId);
   } else if (job.kind === "embedding") {
     await embedMemory(job.ownerId, job.targetId);
+  } else if (job.kind === "connector_sync") {
+    await processConnectorSyncJob(job.ownerId, job.targetId);
   } else {
     throw new Error(`Unknown job kind: ${String(job.kind)}`);
   }
