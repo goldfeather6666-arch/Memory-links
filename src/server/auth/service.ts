@@ -1,5 +1,5 @@
 import { hashPassword, verifyPassword } from "@/server/auth/password";
-import { destroySession } from "@/server/auth/session";
+import { destroySession, destroySessionsForUser } from "@/server/auth/session";
 import { recordAuditEvent } from "@/server/data/audit";
 import {
   createAuthToken,
@@ -195,6 +195,7 @@ export async function resetPassword(
   }
   const newHash = await hashPassword(newPassword);
   await updatePasswordHash(userId, newHash);
+  await destroySessionsForUser(userId);
   await revokeActorTokensForUser(userId);
   await recordAuditEvent({ actorId: userId, action: "auth.password_reset" });
   return { ok: true };
