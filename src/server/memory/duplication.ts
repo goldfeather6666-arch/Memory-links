@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { queryTenant } from "@/db/client";
 import { userHasWorkspaceAccess } from "@/server/data/workspaces";
 import type { ExtractedFact, DuplicateDecision, MemoryView } from "@/server/memory/types";
@@ -82,7 +83,6 @@ function bigrams(s: string): Set<string> {
 }
 
 function hash(input: string): string {
-  const { createHash } = require("crypto") as typeof import("crypto");
   return createHash("sha256").update(input).digest("hex");
 }
 
