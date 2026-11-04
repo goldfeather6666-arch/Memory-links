@@ -1,4 +1,5 @@
-import { claimReadyJobs, completeJob, failJob, type JobRecord } from "@/server/memory/queue";
+import { claimReadyJobs, completeJob, failJob } from "@/server/memory/queue";
+import type { JobRecord } from "@/server/memory/types";
 import { runExtractionJob } from "@/server/memory/extraction";
 import { embedMemory } from "@/server/memory/embeddings";
 import { isRetryableError } from "@/server/memory/errors";
