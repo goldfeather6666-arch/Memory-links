@@ -35,8 +35,20 @@ export interface FetchPageParams {
  * `workspaceId` (filled in by the sync engine) and may leave optional display
  * fields unset.
  */
-export type RawSource = Omit<NormalizedSource, "provider" | "connectionId" | "workspaceId"> &
-  Partial<Pick<NormalizedSource, "content" | "author" | "timestamp" | "modifiedAt" | "fileMeta" | "parentId" | "threadId">>;
+export type RawSource = {
+  externalId: string;
+  recordType: string;
+  title?: string | null;
+  content?: string | null;
+  author?: string | null;
+  timestamp?: string | null;
+  modifiedAt?: string | null;
+  url?: string | null;
+  parentId?: string | null;
+  threadId?: string | null;
+  fileMeta?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown>;
+};
 
 /** Result of a single page of a sync/list request. */
 export interface FetchPageResult {
