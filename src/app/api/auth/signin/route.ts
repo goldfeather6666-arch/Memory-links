@@ -4,7 +4,7 @@ import { createSession } from "@/server/auth/session";
 import { SESSION_COOKIE } from "@/server/auth/constants";
 import { signinSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
-import { getServerEnv } from "@/lib/env";
+import { getServerEnv, isDatabaseConfigured } from "@/lib/env";
 
 function emailFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) return null;
@@ -20,6 +20,13 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Sign-in isn't configured for this environment yet." },
+      { status: 503 },
+    );
   }
 
   const key = emailFromBody(body) ?? getClientRequestIp(req);
