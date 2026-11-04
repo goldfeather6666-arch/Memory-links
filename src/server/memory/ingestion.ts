@@ -149,7 +149,7 @@ export function requireValidIngestionInput(input: IngestionInput): void {
   if (!input.workspaceId || typeof input.workspaceId !== "string") {
     throw new ValidationError("workspaceId is required.");
   }
-  if (input.sourceType !== "text" && input.sourceType !== "note" && input.sourceType !== "markdown" && input.sourceType !== "txt" && input.sourceType !== "conversation" && input.sourceType !== "api") {
+  if (input.sourceType !== "text" && input.sourceType !== "note" && input.sourceType !== "markdown" && input.sourceType !== "txt" && input.sourceType !== "conversation" && input.sourceType !== "api" && input.sourceType !== "connector") {
     throw new ValidationError("Unsupported source type.");
   }
 }
