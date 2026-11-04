@@ -7,6 +7,7 @@ import { listSuggestions } from "@/server/intelligence/suggestions";
 import { listPatterns } from "@/server/intelligence/patterns";
 import { listConsolidations } from "@/server/intelligence/consolidation";
 import { IntelligencePanel } from "@/components/app/intelligence/intelligence-panel";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function IntelligencePage({
   const active =
     workspaces.find((w) => w.workspace.id === sp.workspace)?.workspace ?? workspaces[0].workspace;
   const workspaceId = active.id;
+  const isDemo = active.settings?.is_demo === true;
 
   const [dashboard, settings, contradictions, suggestions, patterns, consolidations] =
     await Promise.all([
@@ -47,6 +49,7 @@ export default async function IntelligencePage({
 
   return (
     <div className="p-6 lg:p-8">
+      {isDemo && <DemoBanner />}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-soft-white">Intelligence</h1>
         <p className="text-sm text-slate">
