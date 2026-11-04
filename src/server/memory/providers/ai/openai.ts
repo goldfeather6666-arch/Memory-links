@@ -1,4 +1,5 @@
-import type { AIProvider, AIProviderFactory } from "./types";
+import type { AIProvider } from "@/server/memory/types";
+import type { AIProviderFactory } from "./types";
 import { extractionResponseSchema } from "./types";
 import { MalformedProviderOutputError, ProviderUnavailableError } from "@/server/memory/errors";
 import type { ExtractionResponse as EngineExtractionResponse } from "@/server/memory/types";
