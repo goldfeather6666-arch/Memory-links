@@ -93,9 +93,7 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
     return { user: null, ok: false, emailSent: false, sessionCreated: false, error: error.message };
   }
 
-  let sessionCreated = false;
   if (data.session && data.user) {
-    sessionCreated = true;
     const user = toUser(data.user);
     await provisionUserRow(user);
     await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
@@ -225,6 +223,6 @@ export async function resetPassword(
   return { ok: true };
 }
 
-export async function signout(_rawToken?: string): Promise<void> {
+export async function signout(): Promise<void> {
   await destroySession();
 }
