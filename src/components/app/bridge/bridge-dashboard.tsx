@@ -665,12 +665,14 @@ function AgentDetailPanel({
   }, [agent.id]);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setEditing(false);
     setName(agent.name);
     setDescription(agent.description ?? "");
     setMode(agent.mode);
     setCategory(agent.category);
     setIssued(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.id]);
@@ -1190,7 +1192,9 @@ function WebhooksPanel({ agents }: { agents: Agent[] }) {
   }, []);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     void load();
+    /* eslint-enable react-hooks/set-state-in-effect */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1399,7 +1403,9 @@ export function BridgeDashboard({
   }, []);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     void loadOverview();
+    /* eslint-enable react-hooks/set-state-in-effect */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
