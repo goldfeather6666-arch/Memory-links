@@ -82,9 +82,9 @@ describe("classifyContradiction", () => {
     expect(r.category).toBe("genuine");
   });
 
-  it("classifies time-separated change as temporal (no auto-newest)", () => {
+  it("classifies time-separated numeric change as temporal (no auto-newest)", () => {
     const r = classifyContradiction(
-      pair("I use a Samsung phone", "I switched to an iPhone", {
+      pair("The project budget is $5k", "We increased the budget to $10k", {
         aDate: "2026-01-10T00:00:00.000Z",
         bDate: "2026-06-20T00:00:00.000Z",
       }),
