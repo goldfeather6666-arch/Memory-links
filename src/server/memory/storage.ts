@@ -159,7 +159,7 @@ export async function updateMemory(
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         memoryId,
-        existing.version,
+        existing.version + 1,
         existing.content,
         existing.summary,
         existing.memoryType,
@@ -216,7 +216,7 @@ export async function setMemoryState(
       : existing.metadata;
   const rows = await queryTenant<Record<string, unknown>>(
     userId,
-    `UPDATE memory_records SET state = $2, metadata = $3 WHERE id = $1
+    `UPDATE memory_records SET state = $2, metadata = $3, version = version + 1 WHERE id = $1
      RETURNING ${MEMORY_SELECT}`,
     [memoryId, state, metadata],
   );
@@ -238,7 +238,7 @@ async function recordVersionChange(
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
       memoryId,
-      prior.version,
+      prior.version + 1,
       prior.content,
       prior.summary,
       prior.memoryType,
