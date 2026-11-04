@@ -122,7 +122,7 @@ interface WebhookRefs {
   workspaceId: string;
   agentId?: string | null;
   resourceType?: string;
-  memoryId?: string;
+  memoryId?: string | null;
   contributionId?: string;
 }
 
