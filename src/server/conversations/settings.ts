@@ -95,7 +95,5 @@ function mapSettingsRow(row: Record<string, unknown>): ChatSettings {
     modelPreference: row.modelPreference ? String(row.modelPreference) : null,
     budgetCapTokens: Number(row.budgetCapTokens ?? DEFAULT_BUDGET_CAP_TOKENS),
     allowStreaming: Boolean(row.allowStreaming),
-    createdAt: String(row.createdAt),
-    updatedAt: String(row.updatedAt),
   };
 }
