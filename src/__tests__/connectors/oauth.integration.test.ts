@@ -151,4 +151,20 @@ describe.skipIf(!hasDb)("connector oauth integration", () => {
     expect(after?.status).toBe("disconnected");
     await queryTenant(null, `DELETE FROM users WHERE id = $1`, [owner.id]);
   });
+
+  it("handleOAuthCallback rejects a provider mismatch with INVALID_STATE", async () => {
+    const { queryTenant, owner, ws } = await setup();
+    await seedState(owner.id, ws.id);
+
+    // The mismatch must fail before any token exchange, so no network is allowed.
+    vi.stubGlobal("fetch", vi.fn());
+
+    const { handleOAuthCallback } = await import("@/server/connectors/oauth");
+    await expect(
+      handleOAuthCallback("google_drive", "code-mismatch", state!),
+    ).rejects.toThrow("INVALID_STATE");
+
+    await queryTenant(null, `DELETE FROM users WHERE id = $1`, [owner.id]);
+    state = null;
+  });
 });
