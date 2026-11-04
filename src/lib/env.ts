@@ -38,6 +38,28 @@ const serverEnvSchema = z.object({
   AGENT_BRIDGE_ENCRYPTION_SECRET: z.string().optional(),
   AGENT_API_RATE_LIMIT: z.coerce.number().int().positive().default(120),
   AGENT_CONTEXT_MAX_MEMORIES: z.coerce.number().int().positive().default(40),
+  /** Part 8 external integrations — connector OAuth + sync. OAuth client
+   * IDs/secrets are optional per provider; when absent, OAuth connection for
+   * that provider is unavailable and the UI shows it as not-configured. The
+   * encryption secret is required to store tokens at rest. */
+  CONNECTOR_ENCRYPTION_SECRET: z.string().optional(),
+  INTEGRATIONS_CRON_SECRET: z.string().optional(),
+  GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
+  GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
+  GITHUB_OAUTH_CLIENT_SECRET: z.string().optional(),
+  NOTION_OAUTH_CLIENT_ID: z.string().optional(),
+  NOTION_OAUTH_CLIENT_SECRET: z.string().optional(),
+  GITLAB_OAUTH_CLIENT_ID: z.string().optional(),
+  GITLAB_OAUTH_CLIENT_SECRET: z.string().optional(),
+  SLACK_OAUTH_CLIENT_ID: z.string().optional(),
+  SLACK_OAUTH_CLIENT_SECRET: z.string().optional(),
+  LINEAR_OAUTH_CLIENT_ID: z.string().optional(),
+  LINEAR_OAUTH_CLIENT_SECRET: z.string().optional(),
+  JIRA_OAUTH_CLIENT_ID: z.string().optional(),
+  JIRA_OAUTH_CLIENT_SECRET: z.string().optional(),
+  DROPBOX_OAUTH_APP_KEY: z.string().optional(),
+  DROPBOX_OAUTH_APP_SECRET: z.string().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
