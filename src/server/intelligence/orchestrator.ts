@@ -22,7 +22,7 @@ import { runConsolidation } from "./consolidation";
 import { runPatternDetection } from "./patterns";
 import { computeAndStoreImportance } from "./importance";
 import { generateSuggestions } from "./suggestions";
-import type { IntelligenceJobKind, IntelligenceJobRecord } from "./types";
+import type { IntelligenceJobRecord } from "./types";
 import { INTELLIGENCE_JOB_KINDS } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -57,13 +57,7 @@ async function assertAccess(userId: string, workspaceId: string): Promise<void> 
 // Enqueue
 // ---------------------------------------------------------------------------
 
-export interface EnqueueIntelligenceOptions {
-  kind: IntelligenceJobKind;
-  triggerType?: "manual" | "scheduled" | "incremental" | "event";
-  idempotencyKey?: string;
-  settings?: Record<string, unknown>;
-  runAfter?: Date;
-}
+import type { IntelligenceJobKind } from "./types";
 
 export async function enqueueIntelligenceJob(
   userId: string,
@@ -214,11 +208,11 @@ async function executeEngineJob(
     }
     case "importance": {
       const r = await computeAndStoreImportance(ownerId, workspaceId, { limit });
-      return { ok: true, retryable: false, summary: r };
+      return { ok: true, retryable: false, summary: { ...r } };
     }
     case "suggestions": {
       const r = await generateSuggestions(ownerId, workspaceId, { limit });
-      return { ok: true, retryable: false, summary: r };
+      return { ok: true, retryable: false, summary: { ...r } };
     }
     case "full_analysis": {
       const entities = await runEntityEnrichment(ownerId, workspaceId, { limit });
