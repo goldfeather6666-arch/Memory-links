@@ -248,7 +248,6 @@ export function ChatApp({
             }}
             onNew={() => void newConversation()}
             onDeleted={() => void loadConversations()}
-            workspaceId={workspaceId}
           />
         </aside>
         {sidebarOpen && (
