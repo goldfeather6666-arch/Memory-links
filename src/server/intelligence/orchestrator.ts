@@ -22,7 +22,7 @@ import { runConsolidation } from "./consolidation";
 import { runPatternDetection } from "./patterns";
 import { computeAndStoreImportance } from "./importance";
 import { generateSuggestions } from "./suggestions";
-import type { IntelligenceJobRecord } from "./types";
+import type { EnqueueIntelligenceOptions, IntelligenceJobRecord } from "./types";
 import { INTELLIGENCE_JOB_KINDS } from "./types";
 
 // ---------------------------------------------------------------------------
