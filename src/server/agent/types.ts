@@ -154,6 +154,7 @@ export interface RegisterAgentInput {
   category?: AgentCategory;
   integrationType?: string;
   mode?: AgentMode;
+  workspaceId?: string;
   scopes?: string[];
   memoryTypes?: string[];
   projectIds?: string[];
