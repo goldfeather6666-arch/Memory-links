@@ -8,6 +8,7 @@
  */
 
 import dynamic from 'next/dynamic'
+import { WebGLSafeScene } from '../three/webgl-scene'
 
 const EpisodicTimeline = dynamic(() => import('../three/dimension-visuals').then((m) => m.EpisodicTimeline), {
   ssr: false,
@@ -91,8 +92,10 @@ export default function Dimensions() {
           return (
             <div key={dim.n} className={`dm-row ${i % 2 === 1 ? 'reverse' : ''}`}>
               <div className="dm-visual">
+              <WebGLSafeScene>
                 <Visual />
-              </div>
+              </WebGLSafeScene>
+            </div>
               <div>
                 <p className="dm-num">{dim.n}</p>
                 <h3 className="dm-t">{dim.t}</h3>
