@@ -338,6 +338,7 @@ export async function getWhatWasTrueSummary(
   const dateLabel = isoAt.slice(0, 10);
   const parts: string[] = [
     `${trueThen} ${trueThen === 1 ? "memory was" : "memories were"} true as of ${dateLabel}`,
+    `${trueNow} ${trueNow === 1 ? "memory is" : "memories are"} true now`,
   ];
   if (newTrue > 0) {
     parts.push(`${newTrue} ${newTrue === 1 ? "has" : "have"} since become true`);
