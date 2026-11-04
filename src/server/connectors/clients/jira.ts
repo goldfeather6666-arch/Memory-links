@@ -6,7 +6,6 @@
  * specific site is passed via `resourceIds[0]` — lists that site's projects.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import type { RawSource } from "./types";
 import {
   bearerAuth,
