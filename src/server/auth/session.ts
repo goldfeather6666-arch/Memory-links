@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { randomBytes } from "crypto";
 import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
 import type { User } from "@/db/schema";
@@ -53,6 +52,7 @@ export async function getCurrentSession(): Promise<SessionUser | null> {
 
 /** Touch/renew is delegated to Supabase token refresh; best-effort no-op. */
 export async function touchSession(_sessionId: string): Promise<void> {
+  void _sessionId;
   // Supabase refreshes the SSR session token automatically; nothing to persist.
 }
 
@@ -68,6 +68,7 @@ export async function destroySession(): Promise<void> {
 
 /** Sign out every session for a user via Supabase (all device sessions). */
 export async function destroySessionsForUser(_userId: string): Promise<void> {
+  void _userId;
   try {
     const sb = await createServerSupabaseClientAsync();
     await sb.auth.signOut({ scope: "global" });
