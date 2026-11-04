@@ -148,6 +148,53 @@ export async function signin(
   };
 }
 
+export interface ResendResult {
+  ok: boolean;
+  /** Matches signup: whether an email was actually delivered. */
+  emailSent: boolean;
+}
+
+/**
+ * Re-issue a verification email for an unverified account. Returns ok=true
+ * regardless of whether the account exists (avoids account enumeration);
+ * emailSent reflects actual delivery of the message.
+ */
+export async function resendVerificationEmail(
+  emailInput: string,
+): Promise<ResendResult> {
+  const email = normalizeEmail(emailInput);
+  const rows = await queryTenant<{ id: string; emailVerified: boolean }>(
+    null,
+    `SELECT id, email_verified AS "emailVerified" FROM users WHERE email = $1 LIMIT 1`,
+    [email],
+  );
+  // Do not reveal whether the account exists.
+  if (rows.length === 0) {
+    return { ok: true, emailSent: false };
+  }
+  const row = rows[0];
+  if (row.emailVerified) {
+    // Already verified — nothing to send; still return ok to avoid enumeration.
+    return { ok: true, emailSent: false };
+  }
+
+  const token = await createAuthToken(row.id, "email_verify");
+  const url = buildActionUrl(`/verify-email?token=${encodeURIComponent(token)}`);
+  let emailSent = false;
+  try {
+    await sendMail({
+      to: email,
+      subject: "Verify your MNEMOSYNE email",
+      text: `Confirm your email by visiting:\n\n${url}\n\nThis link expires in 24 hours.`,
+    });
+    emailSent = true;
+  } catch {
+    emailSent = false;
+  }
+  await recordAuditEvent({ actorId: row.id, action: "auth.verification_resent" });
+  return { ok: true, emailSent };
+}
+
 export async function verifyEmail(rawToken: string): Promise<{ ok: boolean; error?: string }> {
   const userId = await consumeAuthToken(rawToken, "email_verify");
   if (!userId) {
