@@ -45,7 +45,7 @@ describe("extractNumericClaim", () => {
   });
 
   it("returns null when multiple/none quantities present", () => {
-    expect(extractNumericClaim("we shipped 5 units on Jan 1 with 10 people")).toBeNull();
+    expect(extractNumericClaim("we shipped 5 products with 10 people")).toBeNull();
     expect(extractNumericClaim("no numbers here")).toBeNull();
   });
 });
