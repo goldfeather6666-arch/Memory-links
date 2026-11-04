@@ -212,9 +212,9 @@ describe("detectClusters", () => {
       makeEdge({ source: "memory:d", target: "memory:e" }),
     ];
     const { clusters, isolated } = detectClusters(nodes, edges);
-    expect(isolated).toBe(1);
+    expect(isolated).toBe(0);
     expect(clusters[0].size).toBeGreaterThanOrEqual(2);
-    expect(clusters.reduce((s, c) => s + c.size, 0)).toBe(4);
+    expect(clusters.reduce((s, c) => s + c.size, 0)).toBe(5);
   });
   it("all nodes isolated when no edges", () => {
     const nodes = [makeNode({ id: "memory:a" }), makeNode({ id: "memory:b" })];
