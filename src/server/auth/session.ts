@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
+import { randomBytes } from "crypto";
 import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
 import type { User } from "@/db/schema";
+
+/** Generate a cryptographically random URL-safe token. */
+export function generateToken(bytes = 32): string {
+  return randomBytes(bytes).toString("base64url");
+}
 
 export interface SessionUser extends User {
   sessionId: string;
