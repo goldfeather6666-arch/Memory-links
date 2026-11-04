@@ -10,6 +10,7 @@ import type { NormalizedSource } from "@/server/connectors/types";
 import {
   bearerAuth,
   coerceTimestamp,
+  fetchJson,
   pageLimit,
 } from "./types";
 import type {
@@ -17,6 +18,7 @@ import type {
   ConnectorAdapter,
   FetchPageParams,
   FetchPageResult,
+  RawSource,
 } from "./types";
 
 const NOTION_API = "https://api.notion.com/v1";
@@ -46,7 +48,7 @@ function pageTitle(page: Record<string, unknown>): string | null {
   return null;
 }
 
-function toPageSource(page: Record<string, unknown>): NormalizedSource {
+function toPageSource(page: Record<string, unknown>): RawSource {
   const title = pageTitle(page);
   return {
     externalId: typeof page.id === "string" ? page.id : String(page.id ?? ""),
