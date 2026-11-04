@@ -5,7 +5,6 @@
  * cursor-based continuation via `has_more` + `cursor`.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import type { RawSource } from "./types";
 import {
   bearerAuth,
