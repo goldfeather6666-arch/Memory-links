@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/app/icons";
 import { NewProjectForm } from "@/components/app/new-project-form";
 import { WorkspaceSwitcher } from "@/components/app/workspace-switcher";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -41,11 +42,13 @@ export default async function ProjectsPage({
     ? workspaces.find((w) => w.workspace.id === requested) ?? workspaces[0]
     : workspaces[0];
   const workspaceId = selected.workspace.id;
+  const isDemo = selected.workspace.settings?.is_demo === true;
 
   const projects = await listProjectsInWorkspace(session.id, workspaceId);
 
   return (
     <div className="space-y-6">
+      {isDemo && <DemoBanner />}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-soft-white">Projects</h1>
