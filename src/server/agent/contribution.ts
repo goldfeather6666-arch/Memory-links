@@ -123,7 +123,7 @@ async function handleMemoryContribution(
 
   if (!auto) {
     const id = await storePendingContribution(principal, "memory", fact as unknown as Record<string, unknown>);
-    await emitEvent("memory.proposed", {
+    await emitEvent(principal.userId, "memory.proposed", {
       workspaceId: principal.workspaceId,
       agentId: principal.agentId,
       contributionId: id,
@@ -134,7 +134,7 @@ async function handleMemoryContribution(
   const dup = await findDuplicate(principal.userId, principal.workspaceId, fact);
   if (dup.outcome === "duplicate" && dup.existingMemoryId) {
     await storeAutoContribution(principal, "memory", fact as unknown as Record<string, unknown>, dup.existingMemoryId, dup.existingMemoryId);
-    await emitEvent("memory.conflict_detected", {
+    await emitEvent(principal.userId, "memory.conflict_detected", {
       workspaceId: principal.workspaceId,
       agentId: principal.agentId,
       memoryId: dup.existingMemoryId,
@@ -150,7 +150,7 @@ async function handleMemoryContribution(
       changeReason: `agent:${principal.agentId}`,
     });
     await storeAutoContribution(principal, "memory", fact as unknown as Record<string, unknown>, dup.existingMemoryId, null);
-    await emitEvent("memory.updated", {
+    await emitEvent(principal.userId, "memory.updated", {
       workspaceId: principal.workspaceId,
       agentId: principal.agentId,
       memoryId: dup.existingMemoryId,
@@ -162,7 +162,7 @@ async function handleMemoryContribution(
     reason: "agent contribution",
   });
   await storeAutoContribution(principal, "memory", fact as unknown as Record<string, unknown>, mem.id, null);
-  await emitEvent("memory.created", {
+  await emitEvent(principal.userId, "memory.created", {
     workspaceId: principal.workspaceId,
     agentId: principal.agentId,
     memoryId: mem.id,
@@ -235,7 +235,7 @@ async function handleUpdateContribution(
     changeReason: `agent:${principal.agentId}`,
   });
   await storeAutoContribution(principal, "update", { memoryId, ...payload }, memoryId, null);
-  await emitEvent("memory.updated", {
+  await emitEvent(principal.userId, "memory.updated", {
     workspaceId: principal.workspaceId,
     agentId: principal.agentId,
     memoryId,
@@ -276,7 +276,7 @@ export async function submitContribution(
       }
       await softDeleteMemory(principal.userId, memoryId);
       await storeAutoContribution(principal, "delete", { memoryId }, memoryId, null);
-      await emitEvent("memory.archived", {
+      await emitEvent(principal.userId, "memory.archived", {
         workspaceId: principal.workspaceId,
         agentId: principal.agentId,
         memoryId,
@@ -300,7 +300,7 @@ export async function archiveContribution(
   }
   const mem = await archiveMemory(principal.userId, memoryId);
   await storeAutoContribution(principal, "update", { memoryId, archive: true }, memoryId, null);
-  await emitEvent("memory.archived", {
+  await emitEvent(principal.userId, "memory.archived", {
     workspaceId: principal.workspaceId,
     agentId: principal.agentId,
     memoryId,
@@ -416,7 +416,7 @@ export async function decideContribution(
       `UPDATE agent_contributions SET status='approved', memory_id=$2, duplicate_of=$3, conflict_note=$4, decided_at=now(), decision_actor=$5 WHERE id=$1`,
       [contributionId, memoryId, duplicateOf, note ?? null, userId],
     );
-    await emitEvent("memory.approved", {
+    await emitEvent(userId, "memory.approved", {
       workspaceId: c.workspaceId,
       agentId: c.agentId,
       contributionId: c.id,
