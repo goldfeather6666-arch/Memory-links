@@ -87,6 +87,16 @@ export function getServerEnv(): ServerEnv {
 }
 
 /** Public, safe-to-expose client config. */
+/**
+ * True only when the server has a usable DATABASE_URL configured. Used by
+ * auth routes to surface a clear "not configured" state instead of throwing
+ * a generic 500 when the deployed environment lacks a database connection.
+ */
+export function isDatabaseConfigured(): boolean {
+  const raw = process.env.DATABASE_URL;
+  return typeof raw === "string" && raw.trim().length > 0;
+}
+
 export const publicEnv = {
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
