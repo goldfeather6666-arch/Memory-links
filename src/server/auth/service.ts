@@ -2,6 +2,7 @@ import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
 import { destroySession, destroySessionsForUser } from "@/server/auth/session";
 import { recordAuditEvent } from "@/server/data/audit";
 import { queryTenant } from "@/db/client";
+import { ensureDemoWorkspace } from "@/server/demo/seed";
 import type { User } from "@/db/schema";
 
 export interface SignupInput {
@@ -75,6 +76,19 @@ async function provisionUserRow(user: User): Promise<void> {
 }
 
 /**
+ * Best-effort, idempotent demo workspace provisioning. Runs after profile
+ * provisioning on signup/signin. Demo data is optional, so failures are
+ * swallowed — this must NEVER block authentication.
+ */
+async function provisionDemoWorkspace(userId: string): Promise<void> {
+  try {
+    await ensureDemoWorkspace(userId);
+  } catch {
+    // Non-fatal: demo provisioning must never block auth.
+  }
+}
+
+/**
  * Create a new account via Supabase Auth. Email verification is removed from
  * the flow: when the Supabase project has "Confirm email" disabled (the
  * required configuration), signUp returns an authenticated session immediately.
@@ -99,6 +113,7 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
   if (data.session && data.user) {
     const user = toUser(data.user);
     await provisionUserRow(user);
+    await provisionDemoWorkspace(user.id);
     await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
     return { user, ok: true, emailSent: false, sessionCreated: true };
   }
@@ -107,6 +122,7 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
   if (data.user) {
     const user = toUser(data.user);
     await provisionUserRow(user);
+    await provisionDemoWorkspace(user.id);
     await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
     return {
       user,
@@ -139,6 +155,7 @@ export async function signin(
 
   const user = toUser(data.user);
   await provisionUserRow(user);
+  await provisionDemoWorkspace(user.id);
   await recordAuditEvent({ actorId: user.id, action: "auth.signin" });
   return { user, error: null };
 }
