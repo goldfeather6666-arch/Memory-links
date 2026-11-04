@@ -298,7 +298,7 @@ export function buildConsolidationGroups(
 
   // ---- change: newer statement supersedes older, same subject, dates present ----
   {
-    let entIndex = freshEntityIndex(idx, assigned);
+    const entIndex = freshEntityIndex(idx, assigned);
     for (const key of sortedKeys(entIndex)) {
       const members = entIndex
         .get(key)!
