@@ -71,7 +71,12 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
     </>
   ),
-  clock: <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
   users: <path d="M9 11a4 4 0 100-8 4 4 0 000 8zM3 21v-1a6 6 0 0112 0v1M17 11a3.5 3.5 0 100-7m1 7a5 5 0 013 4.6V21" />,
   shield: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />,
   layers: <path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5" />,
