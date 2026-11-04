@@ -27,7 +27,7 @@ function json(data: unknown, status = 200): NextResponse {
   return NextResponse.json({ ok: status < 400, data }, { status });
 }
 function fail(ca: ApiError): NextResponse {
-  return NextResponse.json({ ok: false, error: { code: err.code, message: err.message } }, { status: err.status });
+  return NextResponse.json({ ok: false, error: { code: ca.code, message: ca.message } }, { status: ca.status });
 }
 
 async function requireSession(): Promise<{ session: { id: string } }> {
