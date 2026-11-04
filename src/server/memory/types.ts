@@ -25,7 +25,7 @@ export type JobState =
   | "retryable"
   | "cancelled";
 
-export type JobKind = "extraction" | "embedding";
+export type JobKind = "extraction" | "embedding" | "connector_sync";
 
 export type SourceType =
   | "text"
@@ -35,7 +35,8 @@ export type SourceType =
   | "pdf"
   | "docx"
   | "conversation"
-  | "api";
+  | "api"
+  | "connector";
 
 export interface IngestionInput {
   workspaceId: string;
