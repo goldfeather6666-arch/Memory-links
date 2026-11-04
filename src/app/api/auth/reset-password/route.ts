@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { resetPassword } from "@/server/auth/service";
 import { resetPasswordSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+import { isDatabaseConfigured } from "@/lib/env";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -9,6 +10,13 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Password reset isn't configured for this environment yet." },
+      { status: 503 },
+    );
   }
 
   const key = getClientRequestIp(req);
