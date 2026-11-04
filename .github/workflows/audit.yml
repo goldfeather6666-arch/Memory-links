@@ -1,0 +1,74 @@
+name: Security & migration audit
+
+on:
+  push:
+    branches: [main, 'agent/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  dependency-audit:
+    name: npm audit (high+)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+        # Fails the job when any high/critical advisory exists.
+
+  typecheck:
+    name: TypeScript typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: |
+          if [ -f tsconfig.json ]; then
+            npx tsc --noEmit
+          else
+            echo "No tsconfig.json found; skipping typecheck."
+          fi
+
+  migration-gate:
+    name: Migration gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate migrations
+        run: |
+          if [ ! -d migrations ]; then
+            echo "No migrations/ directory present; skipping."
+            exit 0
+          fi
+          # Require sequential, lexically-ordered NNNN_*.sql files.
+          files=$(ls migrations/NNNN_*.sql 2>/dev/null || ls migrations/000*.sql 2>/dev/null || true)
+          if [ -z "$files" ]; then
+            echo "No ordered migration files found under migrations/."
+            exit 1
+          fi
+          echo "Migration files present:"
+          echo "$files"
+          # Verify each file matches the NNNN_ pattern and there are no gaps.
+          prev=0
+          for f in $files; do
+            base=$(basename "$f")
+            num=${base%%_*}
+            case "$num" in
+              ''|*[!0-9]*) echo "Invalid migration filename: $base"; exit 1 ;;
+            esac
+            if [ "$num" -ne $((prev + 1)) ]; then
+              echo "Migration gap: expected $((prev + 1)) but got $num ($base)"
+              exit 1
+            fi
+            prev=$num
+          done
+          echo "Migrations are sequential and valid."
