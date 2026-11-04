@@ -192,7 +192,6 @@ async function scheduleRetry(
   userId: string,
   deliveryId: string,
   attempt: number,
-  subscriptionId: string,
 ): Promise<void> {
   if (attempt >= MAX_ATTEMPTS) return;
   const nextAttempt = new Date(Date.now() + Math.pow(2, attempt) * 60_000).toISOString();
