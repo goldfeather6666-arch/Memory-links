@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
     const mode = sp.get("mode");
     const projectId = sp.get("projectId");
     const focusId = sp.get("focusId");
-    const focusKind = sp.get("focusKind");
+    const focusKindRaw = sp.get("focusKind");
+    const focusKind =
+      focusKindRaw === "memory" || focusKindRaw === "entity" ? focusKindRaw : undefined;
     const topic = sp.get("topic");
     const nodeTypesRaw = sp.get("nodeTypes");
     const relationshipTypesRaw = sp.get("relationshipTypes");
