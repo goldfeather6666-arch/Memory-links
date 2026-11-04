@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { signup } from "@/server/auth/service";
 import { signupSchema } from "@/server/validation/schemas";
+import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+
+function emailFromBody(body: unknown): string | null {
+  if (typeof body !== "object" || body === null) return null;
+  const record = body as Record<string, unknown>;
+  return typeof record.email === "string" && record.email.trim()
+    ? record.email.trim().toLowerCase()
+    : null;
+}
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -8,6 +17,21 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const key = emailFromBody(body) ?? getClientRequestIp(req);
+  const rl = await checkAuthRateLimit(key, "signup");
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      {
+        status: 429,
+        headers:
+          rl.retryAfterSeconds !== undefined
+            ? { "Retry-After": String(rl.retryAfterSeconds) }
+            : {},
+      },
+    );
   }
 
   const parsed = signupSchema.safeParse(body);
