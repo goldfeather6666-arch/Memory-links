@@ -8,6 +8,7 @@
  */
 
 import type { NormalizedSource } from "@/server/connectors/types";
+import type { RawSource } from "./types";
 import {
   ProviderHttpError,
   bearerAuth,
@@ -30,7 +31,7 @@ async function assertOk(res: Response, data: Record<string, unknown>): Promise<v
   throw new ProviderHttpError("slack", res.status, `slack error: ${err}`);
 }
 
-function toChannelSource(channel: Record<string, unknown>): NormalizedSource {
+function toChannelSource(channel: Record<string, unknown>): RawSource {
   return {
     externalId: typeof channel.id === "string" ? channel.id : String(channel.id ?? ""),
     recordType: "channel",
@@ -51,7 +52,7 @@ function slackTsToIso(ts: unknown): string | null {
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-function toMessageSource(message: Record<string, unknown>, channelId: string): NormalizedSource {
+function toMessageSource(message: Record<string, unknown>, channelId: string): RawSource {
   const text = typeof message.text === "string" ? message.text : null;
   const firstLine = text?.split("\n")[0]?.trim().slice(0, 120) ?? null;
   return {
@@ -135,7 +136,7 @@ async function fetchChannelMessages(
   accessToken: string,
   channelId: string,
   limit?: number,
-): Promise<NormalizedSource[]> {
+): Promise<RawSource[]> {
   const qs = new URLSearchParams({
     channel: channelId,
     limit: String(pageLimit(limit)),
