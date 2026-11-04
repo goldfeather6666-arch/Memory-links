@@ -165,11 +165,11 @@ function RunsTable({ runs }: { runs: SyncRun[] }) {
             <tr key={run.id}>
               <td className="px-3 py-2.5 text-soft-white">{run.trigger}</td>
               <td className="px-3 py-2.5"><RunStatusBadge status={run.status} /></td>
-              <td className="px-3 py-2.5 text-right text-slate">{run.discovered}</td>
-              <td className="px-3 py-2.5 text-right text-slate">{run.imported}</td>
-              <td className="px-3 py-2.5 text-right text-slate">{run.updated}</td>
-              <td className="px-3 py-2.5 text-right text-slate">{run.skipped}</td>
-              <td className="px-3 py-2.5 text-right text-red-400">{run.failed}</td>
+              <td className="px-3 py-2.5 text-right text-slate">{run.recordsDiscovered}</td>
+              <td className="px-3 py-2.5 text-right text-slate">{run.recordsImported}</td>
+              <td className="px-3 py-2.5 text-right text-slate">{run.recordsUpdated}</td>
+              <td className="px-3 py-2.5 text-right text-slate">{run.recordsSkipped}</td>
+              <td className="px-3 py-2.5 text-right text-red-400">{run.recordsFailed}</td>
               <td className="max-w-[180px] px-3 py-2.5">
                 {run.error ? (
                   <span className="block truncate text-red-300" title={run.error}>
@@ -338,7 +338,7 @@ export function ConnectionDetail({
 
   const togglePause = useCallback(async () => {
     if (!detail) return;
-    const action = detail.connection.paused ? "resume" : "pause";
+    const action = detail.connection.status === "paused" ? "resume" : "pause";
     setActionError(null);
     setBusy(action);
     try {
@@ -465,7 +465,7 @@ export function ConnectionDetail({
               <div className="flex flex-wrap items-center gap-2">
                 <CardTitle as="h2">{connection.name}</CardTitle>
                 <ConnectionStatusBadge status={connection.status} />
-                {connection.paused && <Badge variant="subtle">Paused</Badge>}
+                {connection.status === "paused" && <Badge variant="subtle">Paused</Badge>}
               </div>
               <p className="text-xs text-slate">
                 {connection.provider} · {connection.accountName}
@@ -490,7 +490,7 @@ export function ConnectionDetail({
               loading={busy === "pause" || busy === "resume"}
               disabled={busy !== null}
             >
-              {connection.paused ? "Resume" : "Pause"}
+              {connection.status === "paused" ? "Resume" : "Pause"}
             </Button>
             <Button
               type="button"
@@ -522,11 +522,11 @@ export function ConnectionDetail({
           <CardTitle>Permissions</CardTitle>
           <CardDescription>Scopes granted to this connection.</CardDescription>
         </CardHeader>
-        {connection.scopes.length === 0 ? (
+        {connection.scope.length === 0 ? (
           <p className="text-sm text-slate">No scopes recorded.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {connection.scopes.map((scope) => (
+            {connection.scope.map((scope) => (
               <Badge key={scope} variant="subtle">
                 {scope}
               </Badge>
@@ -546,7 +546,7 @@ export function ConnectionDetail({
         ) : (
           <ul className="space-y-2">
             {connection.selectedResources.map((r) => (
-              <li key={r.id} className="rounded-xl border border-soft-white/10 px-4 py-2.5">
+              <li key={r.id ?? String(index)} className="rounded-xl border border-soft-white/10 px-4 py-2.5">
                 <span className="text-sm text-soft-white">{RESOURCE_LABEL(r) || r.id}</span>
                 {r.type && <Badge variant="subtle" className="ml-2">{r.type}</Badge>}
               </li>
