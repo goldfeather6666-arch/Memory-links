@@ -7,7 +7,6 @@
  * All responses carry an `ok` flag; non-ok responses are treated as errors.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import type { RawSource } from "./types";
 import {
   ProviderHttpError,
