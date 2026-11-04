@@ -8,7 +8,7 @@ import { buildMcpServer } from "@/server/agent/mcp/server";
 import type { AgentPrincipal } from "@/server/agent/types";
 
 // ---- Mock the service layer so tools run deterministically without a DB ----
-const mockRecall = vi.fn(async () => ({
+const mockRecall = vi.fn(async (..._args: unknown[]) => ({
   items: [
     {
       memory_id: "m-1",
@@ -23,7 +23,7 @@ const mockRecall = vi.fn(async () => ({
   method: "hybrid",
 }));
 
-const mockGetMemory = vi.fn(async () => ({
+const mockGetMemory = vi.fn(async (..._args: unknown[]) => ({
   memory_id: "m-1",
   content: "We chose PostgreSQL for the memory store.",
   memory_type: "semantic",
@@ -32,15 +32,15 @@ const mockGetMemory = vi.fn(async () => ({
   created_at: "2026-01-10T00:00:00Z",
 }));
 
-const mockListRelated = vi.fn(async () => ({ items: [] }));
+const mockListRelated = vi.fn(async (..._args: unknown[]) => ({ items: [] }));
 
-const mockSubmitContribution = vi.fn(async () => ({
+const mockSubmitContribution = vi.fn(async (..._args: unknown[]) => ({
   id: "pr-1",
   status: "proposed",
 }));
-const mockArchiveContribution = vi.fn(async () => ({ ok: true }));
+const mockArchiveContribution = vi.fn(async (..._args: unknown[]) => ({ ok: true }));
 
-const mockContextPackage = vi.fn(async () => ({
+const mockContextPackage = vi.fn(async (..._args: unknown[]) => ({
   summary: "Project context summary for test project.",
   memories: [
     {
@@ -57,12 +57,12 @@ const mockContextPackage = vi.fn(async () => ({
   retrievedAt: "2026-02-01T00:00:00Z",
 }));
 
-const mockProjects = vi.fn(async () => [{ id: "p-1", name: "Test Project" }]);
-const mockInsights = vi.fn(async () => ({ insights: [] }));
-const mockRecentChanges = vi.fn(async () => ({ changes: [] }));
-const mockTimeline = vi.fn(async () => ({ events: [] }));
+const mockProjects = vi.fn(async (..._args: unknown[]) => [{ id: "p-1", name: "Test Project" }]);
+const mockInsights = vi.fn(async (..._args: unknown[]) => ({ insights: [] }));
+const mockRecentChanges = vi.fn(async (..._args: unknown[]) => ({ changes: [] }));
+const mockTimeline = vi.fn(async (..._args: unknown[]) => ({ events: [] }));
 
-const mockLoadPerms = vi.fn(async () => ({
+const mockLoadPerms = vi.fn(async (..._args: unknown[]) => ({
   agentId: "ag-1",
   workspaceId: "ws-1",
   scopes: ["read:memory", "read:project", "read:graph", "read:usage"],
@@ -100,7 +100,7 @@ const principal: AgentPrincipal = {
   workspaceId: "ws-1",
   agentId: "ag-1",
   name: "Test Agent",
-  mode: "readonly",
+  mode: "read_only",
   category: "coding",
   status: "active",
 };
@@ -151,11 +151,9 @@ class MiniClient {
 
 let server: McpServer;
 let client: MiniClient;
-let clientT: InMemoryTransport;
 
 beforeEach(async () => {
   const [cT, sT] = InMemoryTransport.createLinkedPair();
-  clientT = cT;
   server = buildMcpServer(principal);
   await server.connect(sT);
   client = new MiniClient(cT);
