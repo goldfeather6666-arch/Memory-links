@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
 import { listMemoryRecordsInWorkspace } from "@/server/data/memory";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/app/icons";
