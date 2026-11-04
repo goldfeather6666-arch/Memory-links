@@ -56,7 +56,7 @@ export function ForgotPasswordForm() {
     <Card>
       <CardHeader>
         <CardTitle>Forgot password</CardTitle>
-        <CardDescription>Enter your account email and we'll send you a reset link.</CardDescription>
+        <CardDescription>Enter your account email and we&apos;ll send you a reset link.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
