@@ -144,7 +144,7 @@ export function ChatApp({
         setBusy(false);
       }
     },
-    [api, active, busy, loadConversations, workspaceId],
+    [api, active, busy, loadConversations],
   );
 
   const rememberMessage = useCallback(
