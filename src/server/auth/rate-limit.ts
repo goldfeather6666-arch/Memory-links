@@ -24,7 +24,6 @@ export interface RateLimitResult {
 
 const WINDOW_MS = 15 * 60 * 1000;
 const BASE_LOCKOUT_MS = 60 * 1000;
-const MAX_LOCKOUT_LEVEL = 6; // ~1h cap
 
 const MAX_ATTEMPTS: Record<AuthAction, number> = {
   signin: 10,
