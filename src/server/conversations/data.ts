@@ -33,7 +33,7 @@ const CONVERSATION_SELECT = `
 
 const MESSAGE_SELECT = `
   id, conversation_id AS "conversationId", workspace_id AS "workspaceId",
-  owner_id AS "ownerId", role, content, tokens, evidence, status, error,
+  owner_id AS "ownerId", role, content, tokens, evidence, context, status, error,
   client_request_id AS "clientRequestId", parent_id AS "parentId",
   created_at AS "createdAt", updated_at AS "updatedAt"
 `;
@@ -64,6 +64,7 @@ function mapMessage(row: Record<string, unknown>): MessageRecord {
     content: String(row.content),
     tokens: row.tokens !== null && row.tokens !== undefined ? Number(row.tokens) : null,
     evidence: (row.evidence as MessageRecord["evidence"]) ?? [],
+    context: (row.context as Record<string, unknown>) ?? {},
     status: row.status as MessageRecord["status"],
     error: row.error ? String(row.error) : null,
     clientRequestId: row.clientRequestId ? String(row.clientRequestId) : null,
@@ -262,6 +263,7 @@ export async function createAssistantMessage(
     content: string;
     status: MessageRecord["status"];
     evidence?: MessageRecord["evidence"];
+    context?: Record<string, unknown>;
     tokens?: number | null;
     error?: string | null;
     clientRequestId?: string | null;
@@ -273,8 +275,8 @@ export async function createAssistantMessage(
   await accessGuard(userId, conversation.workspaceId);
   const rows = await queryTenant<Record<string, unknown>>(
     userId,
-    `INSERT INTO conversation_messages (conversation_id, workspace_id, owner_id, role, content, status, evidence, tokens, error, client_request_id, parent_id)
-     VALUES ($1, $2, $3, 'assistant', $4, $5, $6, $7, $8, $9, $10)
+    `INSERT INTO conversation_messages (conversation_id, workspace_id, owner_id, role, content, status, evidence, context, tokens, error, client_request_id, parent_id)
+     VALUES ($1, $2, $3, 'assistant', $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING ${MESSAGE_SELECT}`,
     [
       conversationId,
@@ -283,6 +285,7 @@ export async function createAssistantMessage(
       input.content,
       input.status,
       input.evidence ?? [],
+      input.context ?? {},
       input.tokens ?? null,
       input.error ?? null,
       input.clientRequestId ?? null,
