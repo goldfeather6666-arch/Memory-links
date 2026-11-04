@@ -44,7 +44,7 @@ export function SignUpForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Account created</CardTitle>
+          <CardTitle as="h1">Account created</CardTitle>
           <CardDescription>
             {emailSent
               ? "We sent a verification link to your email. Confirm it to sign in."
@@ -61,7 +61,7 @@ export function SignUpForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create your account</CardTitle>
+        <CardTitle as="h1">Create your account</CardTitle>
         <CardDescription>Start building your personal memory engine.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
