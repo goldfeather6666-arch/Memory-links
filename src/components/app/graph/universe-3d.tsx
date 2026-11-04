@@ -21,7 +21,6 @@ import {
 import * as THREE from "three";
 import {
   entityColor,
-  entityLabel,
   relaxNodes,
   seedPositions,
   type GraphEdgeData,
@@ -120,14 +119,14 @@ function InstancedNodes({
     if (sel === -1) {
       for (let i = 0; i < nodeCount; i++) mesh.setColorAt(i, colors[i]);
     } else {
-      const connected = new Set<number>();
-      for (const e of adjacency[sel]) {
-        // adjacency holds edge indices; we recompute endpoints in the caller
-        // via edgeEndpoints below — here we just use the precomputed set.
-        void e;
+      // Connected node indices for the selected node: for each edge incident
+      // to the selection, mark the other endpoint.
+      const connSet = new Set<number>();
+      for (const edgeIdx of adjacency[sel] ?? []) {
+        const [a, b] = edgeEndpoints[edgeIdx];
+        connSet.add(a);
+        connSet.add(b);
       }
-      // Recompute connected node indices from selection.
-      const connSet = connectedNodeIndices(sel);
       for (let i = 0; i < nodeCount; i++) {
         if (i === sel) {
           mesh.setColorAt(
