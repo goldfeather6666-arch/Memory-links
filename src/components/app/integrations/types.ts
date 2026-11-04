@@ -42,7 +42,13 @@ export interface ConnectionRecord {
   name: string;
   status: ConnectionStatus;
   scope: string[];
-  selectedResources: unknown[];
+  selectedResources: Array<{
+    id?: string;
+    type?: string;
+    title?: string;
+    name?: string;
+    label?: string;
+  }>;
   syncIntervalMin: number | null;
   lastSyncAt: string | null;
   nextSyncAt: string | null;
