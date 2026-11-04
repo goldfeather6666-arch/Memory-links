@@ -59,7 +59,7 @@ export function registerAllTools(server: McpServer, principal: AgentPrincipal | 
       const recall = await recallMemories(p.userId, {
         workspaceId: p.workspaceId,
         query: q,
-        memoryTypes: memoryType ? [memoryType] : undefined,
+        memoryTypes: memoryType ? [memoryType as MemoryType] : undefined,
         limit: limit ?? 20,
         offset: offset ?? 0,
         from,
