@@ -15,6 +15,43 @@ export function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resend, setResend] = useState<{
+    loading: boolean;
+    done: boolean;
+    message: string | null;
+  }>({ loading: false, done: false, message: null });
+
+  const needsVerification =
+    !!error && error.toLowerCase().includes("verify");
+
+  async function handleResend() {
+    if (!email.trim()) {
+      setResend({ loading: false, done: false, message: "Enter your email first to resend." });
+      return;
+    }
+    setResend({ loading: true, done: false, message: null });
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setResend({ loading: false, done: false, message: data.error ?? "Could not resend." });
+        return;
+      }
+      setResend({
+        loading: false,
+        done: true,
+        message: data.emailSent
+          ? "A new verification email was sent. Please check your inbox."
+          : "Verification email delivery isn't configured on this environment yet.",
+      });
+    } catch {
+      setResend({ loading: false, done: false, message: "Could not resend. Please try again." });
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -82,6 +119,27 @@ export function SignInForm() {
         </div>
         {error && (
           <p role="alert" className="text-sm text-red-400">{error}</p>
+        )}
+        {needsVerification && (
+          <div className="rounded-md border border-violet/30 bg-violet/5 p-3 text-sm">
+            {resend.message ? (
+              <p className="text-slate">{resend.message}</p>
+            ) : (
+              <p className="text-slate">
+                Please verify your email to sign in. Haven&apos;t received the confirmation email?
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-2 h-9 px-3 text-xs text-violet"
+              loading={resend.loading}
+              onClick={handleResend}
+              disabled={resend.done}
+            >
+              {resend.loading ? "Resending…" : resend.done ? "Sent" : "Resend verification email"}
+            </Button>
+          </div>
         )}
         <Button type="submit" className="w-full" loading={loading}>
           {loading ? "Signing in…" : "Sign in"}
