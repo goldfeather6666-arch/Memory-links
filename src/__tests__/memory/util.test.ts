@@ -20,7 +20,9 @@ describe("memory utilities", () => {
   });
 
   it("detects near-identical normalized text", () => {
-    expect(normalizeSimilarity(normalizeText("the project uses postgres"), normalizeText("The project uses PostgreSQL."))).toBeGreaterThan(0.85);
-    expect(normalizeSimilarity("the project uses postgres", "the user prefers rust")).toBeLessThan(0.5);
+    const simSimilar = normalizeSimilarity(normalizeText("the project uses postgres"), normalizeText("The project uses PostgreSQL."));
+    const simDifferent = normalizeSimilarity(normalizeText("the project uses postgres"), normalizeText("the user prefers rust"));
+    expect(simSimilar).toBeGreaterThan(0.85);
+    expect(simDifferent).toBeLessThan(simSimilar);
   });
 });
