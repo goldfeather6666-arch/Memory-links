@@ -52,7 +52,7 @@ export function ResetPasswordForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Password reset</CardTitle>
+          <CardTitle as="h1">Password reset</CardTitle>
           <CardDescription>Your password has been updated. You can now sign in.</CardDescription>
         </CardHeader>
         <Link href="/signin" className="inline-flex h-10 items-center justify-center rounded-xl bg-violet text-soft-white hover:bg-violet/85 px-4 text-sm font-medium transition-colors">
@@ -65,7 +65,7 @@ export function ResetPasswordForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Set a new password</CardTitle>
+        <CardTitle as="h1">Set a new password</CardTitle>
         <CardDescription>Choose a new password for your account.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
