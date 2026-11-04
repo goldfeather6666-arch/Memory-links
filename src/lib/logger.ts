@@ -61,14 +61,14 @@ export function logWithReq(
   const url = new URL(req.url);
   const forwarded = req.headers.get("x-forwarded-for");
   const ip = forwarded ? forwarded.split(",")[0]?.trim() : req.headers.get("x-real-ip") ?? undefined;
+  const { msg, ...rest } = fields;
   const base: LogFields = {
-    msg: fields.msg,
+    msg,
     method: req.method,
     path: url.pathname,
     ...(ip ? { ip } : {}),
     ...(userId ? { userId } : {}),
   };
-  const { msg: _msg, ...rest } = fields;
   const merged = { ...base, ...rest };
   emit(level, redactValue(merged, "") as LogFields);
 }
