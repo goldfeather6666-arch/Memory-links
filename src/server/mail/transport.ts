@@ -1,4 +1,4 @@
-import { serverEnv } from "@/lib/env";
+import { getServerEnv } from "@/lib/env";
 
 /**
  * Email transport abstraction. In development (no SMTP configured), links are
@@ -22,7 +22,7 @@ export interface MailTransport {
 
 class DevLoggerTransport implements MailTransport {
   async send(message: MailMessage): Promise<void> {
-    if (process.env.NODE_ENV === "production" && !serverEnv.SMTP_HOST) {
+    if (process.env.NODE_ENV === "production" && !getServerEnv().SMTP_HOST) {
       throw new Error(
         "Email delivery requires SMTP configuration (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS). " +
           "No email was sent.",
@@ -37,7 +37,7 @@ class DevLoggerTransport implements MailTransport {
 
 class SmtpTransport implements MailTransport {
   async send(message: MailMessage): Promise<void> {
-    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = serverEnv;
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = getServerEnv();
     if (!SMTP_HOST || !SMTP_PORT) {
       throw new Error("SMTP not configured (SMTP_HOST/SMTP_PORT required)");
     }
@@ -62,7 +62,7 @@ class SmtpTransport implements MailTransport {
 }
 
 export function getTransport(): MailTransport {
-  const { SMTP_HOST } = serverEnv;
+  const { SMTP_HOST } = getServerEnv();
   return SMTP_HOST ? new SmtpTransport() : new DevLoggerTransport();
 }
 
@@ -71,6 +71,6 @@ export async function sendMail(message: MailMessage): Promise<void> {
 }
 
 export function buildActionUrl(path: string): string {
-  const base = serverEnv.APP_URL.replace(/\/$/, "");
+  const base = getServerEnv().APP_URL.replace(/\/$/, "");
   return `${base}${path}`;
 }
