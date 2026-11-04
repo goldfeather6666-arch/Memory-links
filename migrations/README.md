@@ -19,8 +19,11 @@ table if it does not exist.
 
 ## Notes
 
-- The `vector` extension and the `embedding` column are **reserved** for the
-  future memory engine (Part 3). No embeddings are generated or queried yet.
+- Migration `0002_memory_engine.sql` adds the memory engine schema: ingestion
+  records, an in-database job queue (`processing_jobs`), lifecycle state +
+  version columns on `memory_records`, `memory_versions`, `memory_entities`,
+  a functional GIN full-text index, and a guarded pgvector HNSW index (created
+  only when the extension is available).
 - Row-level security is enabled on all tenant tables. The application sets
   `app.user_id` per connection; policies read it to scope rows to the acting
   user.
