@@ -1,7 +1,6 @@
 import { queryRaw } from "@/db/client";
 import { enqueueJob } from "@/server/memory/queue";
 import { runSync } from "@/server/connectors/sync";
-import type { ConnectionRecord } from "@/server/connectors/types";
 
 /**
  * Background connector sync jobs.
