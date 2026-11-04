@@ -162,7 +162,7 @@ function MemoryCard({ memory, workspaceId }: { memory: MemoryView; workspaceId: 
     >
       <div className="flex flex-wrap items-center gap-2">
         <Badge>{memory.memoryType}</Badge>
-        {memory.state !== "active" && <Badge variant="secondary">{memory.state}</Badge>}
+        {memory.state !== "active" && <Badge variant="subtle">{memory.state}</Badge>}
         <span className="text-xs text-slate">conf {memory.confidence !== null ? memory.confidence.toFixed(2) : "n/a"}</span>
         <span className="text-xs text-slate">v{memory.version}</span>
         <span className="ml-auto text-xs text-slate">{fmtDate(memory.createdAt)}</span>
