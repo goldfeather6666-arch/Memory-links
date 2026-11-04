@@ -50,7 +50,6 @@ export default async function CommandCenterPage({
     stats = null;
   }
 
-  const hasData = stats !== null && stats.total > 0;
 
   return (
     <div className="space-y-6">
@@ -69,7 +68,7 @@ export default async function CommandCenterPage({
         />
       </header>
 
-      {hasData ? (
+      {stats !== null && stats.total > 0 ? (
         <MemoryStats stats={stats} />
       ) : (
         <EmptyState
