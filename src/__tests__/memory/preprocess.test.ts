@@ -15,9 +15,11 @@ describe("preprocessContent", () => {
     expect(out.sizeBytes).toBeGreaterThan(0);
   });
 
-  it("strips control characters but keeps newlines/tabs", () => {
+  it("strips NUL/control characters but keeps newlines/tabs", () => {
     const out = preprocessContent("a\u0000b\u0001c\nd\te");
-    expect(out.content).toBe("abcd\ne");
+    expect(out.content).toBe("abc\nd\te");
+    expect(out.content).not.toContain("\u0000");
+    expect(out.content).not.toContain("\u0001");
   });
 
   it("truncates the preview to 800 chars", () => {
