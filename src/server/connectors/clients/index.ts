@@ -8,7 +8,7 @@
  */
 
 import type { ConnectorAdapter } from "./types";
-import { googleAdapter } from "./google";
+import { googleDriveAdapter, gmailAdapter } from "./google";
 import { githubAdapter } from "./github";
 import { notionAdapter } from "./notion";
 import { onedriveAdapter } from "./onedrive";
@@ -21,8 +21,8 @@ import { rssAdapter } from "./rss";
 import type { ProviderId } from "@/server/connectors/types";
 
 const registry: Record<string, ConnectorAdapter> = {
-  google_drive: googleAdapter,
-  gmail: googleAdapter,
+  google_drive: googleDriveAdapter,
+  gmail: gmailAdapter,
   github: githubAdapter,
   notion: notionAdapter,
   onedrive: onedriveAdapter,
