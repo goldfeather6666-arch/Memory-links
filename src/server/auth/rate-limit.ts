@@ -97,7 +97,6 @@ export async function checkAuthRateLimit(
 
   if (effectiveCount >= maxAttempts) {
     const cooldown = lockoutMs(effectiveLockout);
-    const nextLockoutLevel = Math.min(effectiveLockout + 1, MAX_LOCKOUT_LEVEL);
     const lockedUntilIso = new Date(now + cooldown).toISOString();
     const firstAtIso = new Date(firstAt).toISOString();
 
@@ -105,9 +104,9 @@ export async function checkAuthRateLimit(
       null,
       `UPDATE auth_attempts
           SET attempt_count = $3, first_attempt_at = $4, locked_until = $5,
-              lockout_level = $6
+              lockout_level = lockout_level + 1
         WHERE bucket_key = $1 AND action = $2`,
-      [key, action, effectiveCount, firstAtIso, lockedUntilIso, nextLockoutLevel],
+      [key, action, effectiveCount, firstAtIso, lockedUntilIso],
     );
 
     return { allowed: false, retryAfterSeconds: Math.round(cooldown / 1000) };
