@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function SignUpForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +32,12 @@ export function SignUpForm() {
         setError(data.error ?? "Could not create your account.");
         return;
       }
+      if (data.sessionCreated) {
+        // Email verification is disabled: the user is authenticated immediately.
+        router.push("/app");
+        router.refresh();
+        return;
+      }
       setDone(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -43,7 +51,7 @@ export function SignUpForm() {
       <Card>
         <CardHeader>
           <CardTitle as="h1">Account created</CardTitle>
-          <CardDescription>Your account is ready. You can now sign in.</CardDescription>
+          <CardDescription>Confirm your email to finish signing in.</CardDescription>
         </CardHeader>
         <Link href="/signin" className="inline-flex h-10 items-center justify-center rounded-xl bg-violet text-soft-white hover:bg-violet/85 px-4 text-sm font-medium transition-colors">
           Go to sign in
