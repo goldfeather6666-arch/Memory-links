@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
   content         text NOT NULL,
   tokens          integer,
   evidence        jsonb NOT NULL DEFAULT '[]'::jsonb,
+  context         jsonb NOT NULL DEFAULT '{}'::jsonb,
   status          text NOT NULL DEFAULT 'pending'
                   CHECK (status IN ('pending','streaming','completed','failed','retryable','cancelled')),
   error           text,
