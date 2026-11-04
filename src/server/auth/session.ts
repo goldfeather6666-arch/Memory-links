@@ -83,6 +83,11 @@ export async function destroySession(token: string | undefined): Promise<void> {
   await queryTenant(null, `DELETE FROM sessions WHERE token_hash = $1`, [tokenHash]);
 }
 
+/** Destroy every session belonging to a user (e.g. on password reset). */
+export async function destroySessionsForUser(userId: string): Promise<void> {
+  await queryTenant(null, `DELETE FROM sessions WHERE user_id = $1`, [userId]);
+}
+
 export interface SessionRow {
   id: string;
   userId: string;
