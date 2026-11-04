@@ -29,9 +29,18 @@ export interface FetchPageParams {
   resourceIds?: string[];
 }
 
+/**
+ * A source as produced by an adapter. Adapters do not know the workspace or
+ * connection context, so they omit `provider`, `connectionId` and
+ * `workspaceId` (filled in by the sync engine) and may leave optional display
+ * fields unset.
+ */
+export type RawSource = Omit<NormalizedSource, "provider" | "connectionId" | "workspaceId"> &
+  Partial<Pick<NormalizedSource, "content" | "author" | "timestamp" | "modifiedAt" | "fileMeta" | "parentId" | "threadId">>;
+
 /** Result of a single page of a sync/list request. */
 export interface FetchPageResult {
-  items: NormalizedSource[];
+  items: RawSource[];
   /** Cursor to pass to the next call; null/undefined when this is the last page. */
   nextCursor?: string | null;
   /** True when there are no further pages. */
