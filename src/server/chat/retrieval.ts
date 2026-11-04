@@ -116,7 +116,6 @@ export async function retrieveContext(input: RetrievalInput): Promise<RetrievalO
 
   // 2. Hybrid recall (keyword + semantic when a provider is configured).
   const recallResults: RelevanceResult[] = [];
-  let method = "keyword";
   try {
     const res = await recallMemories(userId, {
       workspaceId,
@@ -124,12 +123,11 @@ export async function retrieveContext(input: RetrievalInput): Promise<RetrievalO
       method: "hybrid",
       limit: 60,
     });
-    method = res.method;
     recallResults.push(...res.items);
   } catch {
     // fall through — retrieval degrades gracefully
   }
-  let evidence = recallResults.map(toRetrievedEvidence);
+  const evidence = recallResults.map(toRetrievedEvidence);
 
   // 3. Graph-neighborhood expansion: pull related entity nodes + timeline event
   //    nodes so the context panel and evidence reflect the broader graph.
