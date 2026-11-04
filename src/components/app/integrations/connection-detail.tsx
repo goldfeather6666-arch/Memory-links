@@ -315,7 +315,6 @@ export function ConnectionDetail({
     /* eslint-disable react-hooks/set-state-in-effect */
     void load();
     /* eslint-enable react-hooks/set-state-in-effect */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
   const syncNow = useCallback(async () => {
