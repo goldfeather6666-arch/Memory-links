@@ -83,7 +83,7 @@ export function ProcessingPanel({ overview, jobs, ingestions }: ProcessingPanelP
             <div className="divide-y divide-soft-white/5">
               {jobs.map((job) => (
                 <div key={job.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <Badge variant="secondary">{job.kind}</Badge>
+                  <Badge variant="subtle">{job.kind}</Badge>
                   <Badge>{job.state}</Badge>
                   <span className="text-sm text-soft-white">#{job.targetId.slice(0, 8)}</span>
                   <span className="text-xs text-slate">attempt {job.attempts}/{job.maxAttempts}</span>
