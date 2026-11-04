@@ -13,7 +13,6 @@ import { queryTenant } from "@/db/client";
 
 const ALGO = "aes-256-gcm";
 const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 
 export interface StoredKey {
   provider: string;
