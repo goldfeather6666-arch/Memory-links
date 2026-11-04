@@ -26,6 +26,8 @@ const serverEnvSchema = z.object({
   EMBEDDING_PROVIDER: z.enum(["openai"]).optional(),
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
   EMBEDDING_DIM: z.coerce.number().int().positive().default(1536),
+  /** Part 4 intelligence — secret guarding the protected cron/trigger route. */
+  INTELLIGENCE_CRON_SECRET: z.string().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
