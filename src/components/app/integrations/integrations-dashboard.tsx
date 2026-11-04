@@ -123,7 +123,6 @@ export function IntegrationsDashboard({ workspaceId }: { workspaceId: string }) 
     /* eslint-disable react-hooks/set-state-in-effect */
     void load();
     /* eslint-enable react-hooks/set-state-in-effect */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
   const connect = useCallback(
