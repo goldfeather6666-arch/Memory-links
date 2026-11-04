@@ -1,6 +1,6 @@
 import type { AIProvider, AIProviderFactory } from "./types";
 import { extractionResponseSchema } from "./types";
-import { MalformedProviderOutputError } from "@/server/memory/errors";
+import { MalformedProviderOutputError, ProviderUnavailableError } from "@/server/memory/errors";
 import type { ExtractionResponse as EngineExtractionResponse } from "@/server/memory/types";
 
 const DEFAULT_SYSTEM_PROMPT = `
@@ -61,12 +61,12 @@ class OpenAICompatibleProvider implements AIProvider {
         signal: AbortSignal.timeout(60_000),
       });
     } catch (err) {
-      throw new MalformedProviderOutputError(`AI provider request failed: ${err instanceof Error ? err.message : String(err)}`);
+      throw new ProviderUnavailableError(`AI provider request failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new MalformedProviderOutputError(`AI provider returned HTTP ${res.status}: ${truncate(text, 300)}`);
+      throw new ProviderUnavailableError(`AI provider returned HTTP ${res.status}: ${truncate(text, 300)}`);
     }
 
     let json: unknown;
