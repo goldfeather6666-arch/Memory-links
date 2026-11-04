@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 // GitHub OAuth client credentials required by getClientCredentials("github").
-process.env.DATABASE_URL = process.env.DATABASE_URL ?? "postgres://user:pass@localhost:5432/test";
+// Note: do NOT stub DATABASE_URL — the suite stays skipped when it is absent, so
+// a synthetic URL must never enable DB-gated tests against a dead connection.
 process.env.GITHUB_OAUTH_CLIENT_ID = "test-client-id";
 process.env.GITHUB_OAUTH_CLIENT_SECRET = "test-client-secret";
 process.env.CONNECTOR_ENCRYPTION_SECRET = "test-connector-secret";
