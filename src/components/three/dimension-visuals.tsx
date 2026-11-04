@@ -7,6 +7,7 @@
 
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
+import { CanvasMountGate } from './canvas-mount-gate'
 import * as THREE from 'three'
 import { makeRandom } from './shaders'
 import { useInView } from '../../lib/hooks/use-in-view'
@@ -58,10 +59,12 @@ export function EpisodicTimeline() {
   const { ref, inView } = useInView<HTMLDivElement>()
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas camera={{ position: [0, 0, 9], fov: 40 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
         <ambientLight intensity={1.2} />
         <TimelineScene />
       </Canvas>
+      </CanvasMountGate>
     </div>
   )
 }
@@ -84,6 +87,7 @@ export function SemanticNodes() {
   }, [sats])
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
         <ambientLight intensity={1.3} />
         <SpinGroup speed={0.12}>
@@ -100,6 +104,7 @@ export function SemanticNodes() {
           <LineNet pairs={pairs} color="#5a4a9a" />
         </SpinGroup>
       </Canvas>
+      </CanvasMountGate>
     </div>
   )
 }
@@ -149,10 +154,12 @@ export function ProceduralPath() {
   const { ref, inView } = useInView<HTMLDivElement>()
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas camera={{ position: [0, 0, 8], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
         <ambientLight intensity={1.3} />
         <PathScene />
       </Canvas>
+      </CanvasMountGate>
     </div>
   )
 }
@@ -176,6 +183,7 @@ export function AssociativeGraph() {
   }, [pts])
   return (
     <div ref={ref} style={{ width: '100%', height: '100%' }}>
+      <CanvasMountGate>
       <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }} frameloop={inView ? 'always' : 'never'} style={CANVAS_STYLE}>
         <ambientLight intensity={1.3} />
         <SpinGroup speed={0.09}>
@@ -188,6 +196,7 @@ export function AssociativeGraph() {
           <LineNet pairs={pairs} color="#4a4a7a" opacity={0.35} />
         </SpinGroup>
       </Canvas>
+      </CanvasMountGate>
     </div>
   )
 }
