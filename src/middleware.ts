@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/server/auth/session";
+import { SESSION_COOKIE } from "@/server/auth/constants";
 
 /**
  * Middleware gate for protected areas. It performs a cheap cookie-presence
