@@ -95,8 +95,10 @@ export async function recallMemories(
   if (query && method !== "semantic") {
     values.push(query);
     const qIdx = values.length;
-    rankExpr = `ts_rank_cd(search_vector, plainto_tsquery('english', $${qIdx})) AS rank`;
-    orderSql = `ts_rank_cd(search_vector, plainto_tsquery('english', $${qIdx})) DESC, created_at DESC`;
+    const tsvec = `to_tsvector('english', content || ' ' || coalesce(summary, ''))`;
+    const tq = `plainto_tsquery('english', $${qIdx})`;
+    rankExpr = `ts_rank_cd(${tsvec}, ${tq}) AS rank`;
+    orderSql = `ts_rank_cd(${tsvec}, ${tq}) DESC, created_at DESC`;
   }
 
   const rows = await queryTenant<Record<string, unknown>>(
