@@ -1,5 +1,5 @@
 import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
-import { destroySession } from "@/server/auth/session";
+import { destroySession, destroySessionsForUser } from "@/server/auth/session";
 import { recordAuditEvent } from "@/server/data/audit";
 import { queryTenant } from "@/db/client";
 import type { User } from "@/db/schema";
@@ -225,6 +225,6 @@ export async function resetPassword(
   return { ok: true };
 }
 
-export async function signout(rawToken: string | undefined): Promise<void> {
-  await destroySession(rawToken);
+export async function signout(_rawToken?: string): Promise<void> {
+  await destroySession();
 }
