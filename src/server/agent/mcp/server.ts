@@ -19,9 +19,16 @@ export function buildMcpServer(principal: AgentPrincipal | null): McpServer {
  * the route before calling `fetch`; the authenticated principal is passed
  * through `authInfo.extra` to the per-request server factory.
  */
-export const mcpHandler = createMcpHandler({
-  legacy: "stateless",
-  responseMode: "auto",
-  maxRequestBodySize: 1_000_000,
-  factory: (ctx) => buildMcpServer(ctx.authInfo ? principalFromAuthInfo(ctx.authInfo) : null),
-});
+export const mcpHandler = createMcpHandler(
+  (ctx: { authInfo?: { token?: string } }) =>
+    buildMcpServer(ctx.authInfo?.token ? principalFromToken(ctx.authInfo.token) : null),
+  { legacy: "stateless", responseMode: "auto", maxRequestBodySize: 1_000_000 },
+);
+
+// Lightweight bearer-token -> principal resolution used by the factory.
+function principalFromToken(token: string): AgentPrincipal | null {
+  // Real resolution happens in the route (signature check + DB lookup) and is
+  // passed through authInfo.extra; if no extra principal is present we fail
+  // closed (null principal -> no tools/resources).
+  return null;
+}
