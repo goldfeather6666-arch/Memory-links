@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { destroySession, SESSION_COOKIE } from "@/server/auth/session";
+import { destroySession } from "@/server/auth/session";
+import { SESSION_COOKIE } from "@/server/auth/constants";
 
 export async function POST(req: Request) {
   const cookieStore = req.headers.get("cookie") ?? "";
