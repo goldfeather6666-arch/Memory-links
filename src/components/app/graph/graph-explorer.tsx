@@ -186,13 +186,14 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
       );
       setSnapshotName("");
       setSnapshotMsg("Snapshot saved.");
+      void refreshSnapshots();
       window.setTimeout(() => setSnapshotMsg(null), 2500);
     } catch {
       setSnapshotMsg("Could not save snapshot.");
     }
   };
 
-  const loadSnapshots = useCallback(async () => {
+  const refreshSnapshots = useCallback(async () => {
     try {
       const data = await fetchJson<{ id: string; name: string; mode: string }[]>(
         `/api/v1/graph/snapshots?ws=${workspaceId}`,
@@ -202,10 +203,6 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
       /* keep empty */
     }
   }, [workspaceId]);
-
-  useEffect(() => {
-    void loadSnapshots();
-  }, [loadSnapshots]);
 
   const handleExport = async (format: "json" | "nodes-csv" | "edges-csv") => {
     const res = await fetch(`/api/v1/graph/export?ws=${workspaceId}&format=${format}`);
@@ -484,6 +481,9 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
           {snapshots.map((s) => (
             <Badge key={s.id} variant="subtle">{s.name}</Badge>
           ))}
+          <Button type="button" size="sm" variant="ghost" onClick={() => void refreshSnapshots()}>
+            Refresh
+          </Button>
         </div>
       )}
 
