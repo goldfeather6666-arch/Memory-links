@@ -17,7 +17,7 @@ export const APP_NAV: AppNavItem[] = [
   { href: "/app/chat", label: "AI Chat", description: "Talk to your memory (Part 3)", icon: "chat" },
   { href: "/app/bridge", label: "Agent Bridge", description: "Connect external agents (Part 3)", icon: "bridge" },
   { href: "/app/processing", label: "Processing Center", description: "Track and retry memory jobs", icon: "activity" },
-  { href: "/app/intelligence", label: "Intelligence", description: "Autonomous memory analysis and insights", icon: "spark" },
+  { href: "/app/intelligence", label: "Intelligence", description: "Autonomous analysis", icon: "spark" },
   { href: "/app/settings", label: "Settings", description: "Manage your account and preferences", icon: "settings" },
 ];
 
