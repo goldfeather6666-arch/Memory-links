@@ -62,6 +62,18 @@ Server-side variables (validated by `src/lib/env.ts`):
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — optional;
   when unset, email links are logged to the dev console instead of sent.
 
+Memory engine (Part 3) — all optional; when providers are unconfigured the
+engine preserves ingestions and records retryable failures (it never fabricates
+memories or embeddings):
+
+- `AI_PROVIDER=openai` + `OPENAI_API_KEY` — enables AI extraction.
+- `OPENAI_BASE_URL`, `OPENAI_MODEL` — defaults to the OpenAI API and
+  `gpt-4o-mini`.
+- `EMBEDDING_PROVIDER=openai`, `EMBEDDING_MODEL`, `EMBEDDING_DIM` — enables
+  semantic search via pgvector (dim must match the 1536 column).
+- `JOB_CONCURRENCY`, `JOB_TIMEOUT_MS`, `JOB_MAX_ATTEMPTS`,
+  `INGESTION_MAX_BYTES` — job queue / ingestion tuning.
+
 Public:
 
 - `NEXT_PUBLIC_SITE_URL` — public site URL, used by `robots.ts` and
@@ -90,9 +102,41 @@ tables; the data-access layer also enforces owner/workspace scope server-side.
   cookies, email verification and password-reset tokens.
 - Public pages: `/signin`, `/signup`, `/forgot-password`, `/reset-password`,
   `/verify-email`.
-- Authenticated app at `/app` (redirects to `/signin` when logged out) with nine
+- Authenticated app at `/app` (redirects to `/signin` when logged out) with ten
   destinations: Command Center, Memory Vault, Knowledge Graph, Timeline,
-  Projects, Documents, AI Chat, Agent Bridge, Settings.
+  Projects, Documents, AI Chat, Agent Bridge, Processing Center, Settings.
+
+## Memory engine (Part 3)
+
+The core engine lives in `src/server/memory/` as a modular, provider-independent
+pipeline: preprocess → ingestion → extraction → classification → enrichment →
+embedding → storage → duplicate detection → relationships → retrieval →
+lifecycle, coordinated by a queue + service orchestrator.
+
+- **Providers** — replaceable AI and embedding adapters (OpenAI-compatible)
+  resolved from env; unconfigured providers produce honest retryable failures.
+- **Ingestion** — text/note/markdown/txt with checksum idempotency, size
+  limits, provenance, and non-blocking background jobs.
+- **Extraction** — strict zod schema validation of structured provider output;
+  invalid or malformed output is recorded as a provider failure, never stored.
+- **Classification** — primary episodic/semantic/procedural/associative type
+  with confidence, summary, entities, and validity window.
+- **Storage** — provenance, version history (`memory_versions`), entities,
+  soft + explicit hard delete, RLS + server-side authorization.
+- **Duplicate detection** — exact hash, normalized text, source-level, and
+  semantic similarity; conflicts escalate to `needs_review`, never overwritten.
+- **Retrieval** — keyword (Postgres FTS), semantic (pgvector), and hybrid
+  scoring; relevance is kept separate from confidence; workspace-scoped.
+- **Lifecycle** — pending/processing/active/needs_review/archived/deleted with
+  retry, review, edit, archive, delete; no automatic deletion.
+
+UI: **Memory Vault** (`/app/vault`), **Add memory** (`/app/vault/new`),
+**Memory detail** (`/app/vault/[id]`), **Processing Center** (`/app/processing`).
+
+Versioned API (auth required): `POST /api/v1/ingest`, `GET /api/v1/ingest/[id]`,
+`GET /api/v1/memories`, `GET /api/v1/memories/search`, `GET|PATCH|DELETE
+/api/v1/memories/[id]`, `POST /api/v1/memories/[id]/archive`, `POST
+/api/v1/processing/retry`.
 
 ## Structure
 
