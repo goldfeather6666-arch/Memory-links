@@ -11,19 +11,24 @@ export interface NewAuditEvent {
 }
 
 export async function recordAuditEvent(input: NewAuditEvent): Promise<void> {
-  await queryTenant(
-    input.actorId ?? null,
-    `INSERT INTO audit_events (actor_id, action, entity_type, entity_id, workspace_id, metadata)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [
+  try {
+    await queryTenant(
       input.actorId ?? null,
-      input.action,
-      input.entityType ?? null,
-      input.entityId ?? null,
-      input.workspaceId ?? null,
-      input.metadata ?? {},
-    ],
-  );
+      `INSERT INTO audit_events (actor_id, action, entity_type, entity_id, workspace_id, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        input.actorId ?? null,
+        input.action,
+        input.entityType ?? null,
+        input.entityId ?? null,
+        input.workspaceId ?? null,
+        input.metadata ?? {},
+      ],
+    );
+  } catch {
+    // Audit is best-effort: never break the auth/data flow if the audit store
+    // (DATABASE_URL) is unreachable.
+  }
 }
 
 export async function listAuditEventsForUser(
