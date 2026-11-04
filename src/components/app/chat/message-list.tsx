@@ -22,7 +22,7 @@ export function MessageList({ messages, busy, onRemember, onRegenerate }: Props)
         </div>
         <p className="max-w-md text-sm text-slate-400">
           Start by asking about something you remember discussing — a project,
-          a decision, a person, or what happened "a while ago.
+          a decision, a person, or what happened a while ago.
         </p>
       </div>
     );
