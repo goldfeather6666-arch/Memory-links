@@ -497,7 +497,7 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
             </div>
           ) : visible.nodes.length === 0 ? (
             <EmptyState
-              icon="graph"
+              icon={<Icon name="graph" size={24} />}
               title="No graph data yet"
               description="Ingest memories and run entity enrichment to populate the graph."
             />
