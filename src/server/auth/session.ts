@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { queryTenant } from "@/db/client";
-import type { Session, User } from "@/db/schema";
+import type { User } from "@/db/schema";
 import { getServerEnv } from "@/lib/env";
 import { SESSION_COOKIE } from "@/server/auth/constants";
 
