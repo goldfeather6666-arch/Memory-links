@@ -47,6 +47,13 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (!el) return;
       event.preventDefault();
       lenis.scrollTo(el as HTMLElement, { duration: 1.2 });
+      // Keep the URL in sync with the target anchor (Lenis handles the scroll,
+      // so we update history without triggering a native jump).
+      try {
+        window.history.pushState(null, "", href);
+      } catch {
+        // Ignore environments where history is restricted (e.g. sandboxed iframes).
+      }
     };
     document.addEventListener("click", handleClick);
 
