@@ -1,5 +1,5 @@
-import type { McpServer } from "@modelcontextprotocol/server";
-import { recallMemories } from "@/server/memory/retrieval";
+import { ResourceTemplate, type McpServer } from "@modelcontextprotocol/server";
+import { recallMemories } from "@//server/memory/retrieval";
 import { buildContextPackage } from "../context";
 import {
   listAuthorizedProjects,
@@ -19,24 +19,34 @@ function resourceError(message: string) {
 
 export function registerAllResources(server: McpServer, principal: AgentPrincipal | null): void {
   if (!principal) {
-    // Unauthenticated: only register the (empty) template so route errors are clear.
+    // Unauthenticated: nothing is exposed.
     return;
   }
   const p = principal;
   const permsP = () => loadPerms(p);
 
+  const template = new ResourceTemplate("mnemosyne://workspace/{workspaceId}/{section}", {
+    list: async () => ({
+      resources: SECTIONS.map((section) => ({
+        uri: `mnemosyne://workspace/${p.workspaceId}/${section}`,
+        name: `workspace-${section}`,
+        mimeType: "application/json",
+      })),
+    }),
+  });
+
   server.registerResource(
     "workspace-section",
-    "mnemosyne://workspace/{workspaceId}/{section}",
+    template,
     {
       title: "Workspace resource",
-      description: "Read-only, authorized views of a workspace (overview, projects, preferences, memory-summary, timeline).",
+      description:
+        "Read-only, authorized views of a workspace (overview, projects, preferences, memory-summary, timeline).",
       mimeType: "application/json",
     },
-    async (uri: URL) => {
-      const path = uri.pathname.split("/").filter(Boolean); // [workspace, {id}, {section}]
-      const workspaceId = path[1];
-      const section = path[2];
+    async (_uri: URL, variables) => {
+      const workspaceId = String(variables.workspaceId ?? "");
+      const section = String(variables.section ?? "");
       if (!workspaceId || workspaceId !== p.workspaceId) {
         return resourceError("FORBIDDEN: workspace not authorized");
       }
@@ -82,7 +92,7 @@ export function registerAllResources(server: McpServer, principal: AgentPrincipa
       return {
         contents: [
           {
-            uri: uri.toString(),
+            uri: `mnemosyne://workspace/${p.workspaceId}/${section}`,
             mimeType: "application/json",
             text: JSON.stringify(payload, null, 2),
           },
