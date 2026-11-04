@@ -6,6 +6,7 @@ import { listMemories } from "@/server/memory/storage";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/app/icons";
 import type { MemoryView } from "@/server/memory/types";
+import { DemoBanner } from "@/components/app/demo-banner";
 
 const TYPES = ["episodic", "semantic", "procedural", "associative"] as const;
 
@@ -56,6 +57,7 @@ export default async function VaultPage({
     );
   }
   const active = workspaces.find((w) => w.workspace.id === sp.workspace)?.workspace ?? workspaces[0].workspace;
+  const isDemo = active.settings?.is_demo === true;
   const q = sp.q?.trim() ?? "";
   const type = sp.type ?? null;
 
@@ -63,6 +65,7 @@ export default async function VaultPage({
 
   return (
     <div className="p-6 lg:p-8">
+      {isDemo && <DemoBanner />}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-soft-white">Memory Vault</h1>
