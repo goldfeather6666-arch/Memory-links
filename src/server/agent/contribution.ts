@@ -56,7 +56,11 @@ function toFact(payload: Record<string, unknown>): ExtractedFact {
     validFrom: payload.validFrom ? String(payload.validFrom) : null,
     validUntil: payload.validUntil ? String(payload.validUntil) : null,
     entities: Array.isArray(payload.entities)
-      ? (payload.entities as { name: string; type?: string }[])
+      ? (payload.entities as { name: string; type?: string }[]).map((e) => ({
+          type: e.type ?? "entity",
+          value: e.name,
+          confidence: typeof payload.confidence === "number" ? payload.confidence : 0.7,
+        }))
       : [],
   };
 }
