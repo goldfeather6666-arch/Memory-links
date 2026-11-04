@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
-import { updateConnectionStatus } from "@/server/connectors/connections";
+import { updateConnectionStatus, getConnection } from "@/server/connectors/connections";
 
 /**
  * POST /api/v1/integrations/:id/resume?ws=<workspaceId>
@@ -25,7 +25,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const workspaceId = selected.workspace.id;
 
   try {
-    const connection = await updateConnectionStatus(session.id, workspaceId, id, "connected");
+    await updateConnectionStatus(session.id, workspaceId, id, "connected");
+    const connection = await getConnection(session.id, workspaceId, id);
     if (!connection) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
