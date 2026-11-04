@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/server/auth/session";
 import { listWorkspacesForUser } from "@/server/data/workspaces";
-import { projectGraph } from "@/server/intelligence/graph";
+import { projectGraph, type GraphMode } from "@/server/intelligence/graph";
 
 // Knowledge graph projection endpoint.
 export const dynamic = "force-dynamic";
@@ -56,8 +56,9 @@ export async function GET(req: NextRequest) {
     const limitNodes = limitNodesRaw != null && limitNodesRaw !== "" ? Number(limitNodesRaw) : undefined;
     const limitEdges = limitEdgesRaw != null && limitEdgesRaw !== "" ? Number(limitEdgesRaw) : undefined;
 
+    const modeTyped = (mode as GraphMode) ?? undefined;
     const parsed = {
-      ...(mode ? { mode } : {}),
+      ...(modeTyped ? { mode: modeTyped } : {}),
       ...(projectId ? { projectId } : {}),
       ...(focusId ? { focusId } : {}),
       ...(focusKind ? { focusKind } : {}),
