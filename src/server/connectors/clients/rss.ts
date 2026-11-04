@@ -28,7 +28,7 @@ function extract(value: string | undefined): string | null {
 }
 
 function parseItems(feed: string): RawSource[] {
-  const items: NormalizedSource[] = [];
+  const items: RawSource[] = [];
   // Match <item>...</item> (RSS 2.0) and <entry>...</entry> (Atom).
   const blockRe = /<(?:item|entry)(?:[^>]*)>([\s\S]*?)<\/(?:item|entry)>/gi;
   let match: RegExpExecArray | null;
