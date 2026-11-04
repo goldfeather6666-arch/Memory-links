@@ -7,7 +7,6 @@
  * are normalised to distinct record types.
  */
 
-import type { NormalizedSource } from "@/server/connectors/types";
 import type { RawSource } from "./types";
 import {
   bearerAuth,
