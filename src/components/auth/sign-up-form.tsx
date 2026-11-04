@@ -13,7 +13,6 @@ export function SignUpForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -32,7 +31,6 @@ export function SignUpForm() {
         return;
       }
       setDone(true);
-      setEmailSent(Boolean(data.emailSent));
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -45,11 +43,7 @@ export function SignUpForm() {
       <Card>
         <CardHeader>
           <CardTitle as="h1">Account created</CardTitle>
-          <CardDescription>
-            {emailSent
-              ? "We sent a verification link to your email. Confirm it to sign in."
-              : "Account created. Verification email delivery isn't configured on this environment yet."}
-          </CardDescription>
+          <CardDescription>Your account is ready. You can now sign in.</CardDescription>
         </CardHeader>
         <Link href="/signin" className="inline-flex h-10 items-center justify-center rounded-xl bg-violet text-soft-white hover:bg-violet/85 px-4 text-sm font-medium transition-colors">
           Go to sign in
