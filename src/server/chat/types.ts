@@ -107,6 +107,8 @@ export interface ChatRunResult {
 }
 
 export interface ChatRunOptions {
+  /** ID of the authenticated user making the request (server-resolved). */
+  userId: string;
   workspaceId: string;
   conversationId: string;
   content: string;
