@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/app/icons";
 import { WorkspaceSwitcher } from "@/components/app/workspace-switcher";
 import { NewWorkspaceForm } from "@/components/app/new-workspace-form";
+import { DemoBanner } from "@/components/app/demo-banner";
+import { OnboardingTour } from "@/components/app/onboarding-tour";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +77,13 @@ export default async function CommandCenterPage({
           current={workspaceId}
         />
       </header>
+
+      {selected.workspace.settings?.is_demo === true && (
+        <>
+          <DemoBanner />
+          <OnboardingTour />
+        </>
+      )}
 
       {stats !== null && stats.total > 0 ? (
         <MemoryStats stats={stats} />
