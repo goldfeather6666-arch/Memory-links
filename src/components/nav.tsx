@@ -52,10 +52,22 @@ export default function Nav() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Link
+            href="/signin"
+            className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate transition-colors hover:text-soft-white sm:inline-flex"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/signup"
+            className="hidden rounded-full bg-violet px-4 py-2 text-sm font-medium text-soft-white transition-colors hover:bg-violet/85 sm:inline-flex"
+          >
+            Sign up
+          </Link>
           <Link
             href="#final-cta"
-            className="hidden rounded-full bg-violet px-4 py-2 text-sm font-medium text-soft-white transition-colors hover:bg-violet/85 sm:inline-flex"
+            className="hidden rounded-full px-3 py-2 text-sm text-slate transition-colors hover:text-soft-white sm:inline-flex"
           >
             Early access
           </Link>
@@ -111,9 +123,27 @@ export default function Nav() {
               ))}
               <li>
                 <Link
-                  href="#final-cta"
+                  href="/signin"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-xl px-4 py-3 text-sm text-slate transition-colors hover:bg-soft-white/5 hover:text-soft-white"
+                >
+                  Sign in
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/signup"
                   onClick={() => setOpen(false)}
                   className="mt-2 block rounded-xl bg-violet px-4 py-3 text-center text-sm font-medium text-soft-white"
+                >
+                  Sign up
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="#final-cta"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 block rounded-xl px-4 py-3 text-center text-sm text-slate transition-colors hover:text-soft-white"
                 >
                   Early access
                 </Link>
