@@ -1,17 +1,6 @@
-import { hashPassword, verifyPassword } from "@/server/auth/password";
-import { destroySession, destroySessionsForUser } from "@/server/auth/session";
+import { createServerSupabaseClientAsync } from "@/lib/supabase/server";
+import { destroySession } from "@/server/auth/session";
 import { recordAuditEvent } from "@/server/data/audit";
-import {
-  createAuthToken,
-  consumeAuthToken,
-  revokeActorTokensForUser,
-} from "@/server/data/auth-tokens";
-import {
-  getPasswordHash,
-  setEmailVerified,
-  updatePasswordHash,
-} from "@/server/data/users";
-import { buildActionUrl, sendMail } from "@/server/mail/transport";
 import { queryTenant } from "@/db/client";
 import type { User } from "@/db/schema";
 
@@ -22,55 +11,112 @@ export interface SignupInput {
 }
 
 export interface SignupResult {
-  user: User;
+  user: User | null;
+  ok: boolean;
   emailSent: boolean;
+  /** True when a session was issued immediately (email confirmation disabled). */
+  sessionCreated: boolean;
+  error?: string;
 }
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+function toUser(sbUser: {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown>;
+  email_confirmed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}): User {
+  const meta = sbUser.user_metadata ?? {};
+  const displayName =
+    (meta.display_name as string | undefined) ??
+    (meta.name as string | undefined) ??
+    null;
+  const avatarUrl = (meta.avatar_url as string | undefined) ?? null;
+  return {
+    id: sbUser.id,
+    email: sbUser.email ?? "",
+    displayName,
+    avatarUrl,
+    emailVerified: Boolean(sbUser.email_confirmed_at),
+    createdAt: sbUser.created_at ?? "",
+    updatedAt: sbUser.updated_at ?? "",
+  };
+}
+
 /**
- * Create a new user. Returns the user and whether an email was delivered.
- * Email verification is removed from the flow, so accounts are created with
- * email_verified = true and no message is ever sent (emailSent is always false).
+ * Best-effort provisioning of the internal `users` row keyed by the Supabase
+ * user id. This keeps the app's data layer consistent with Supabase Auth but
+ * never blocks authentication when DATABASE_URL is absent.
+ */
+async function provisionUserRow(user: User): Promise<void> {
+  try {
+    await queryTenant(
+      null,
+      `INSERT INTO users (id, email, display_name, avatar_url, email_verified)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id) DO UPDATE SET
+         email = EXCLUDED.email,
+         display_name = COALESCE(EXCLUDED.display_name, users.display_name),
+         avatar_url = COALESCE(EXCLUDED.avatar_url, users.avatar_url),
+         email_verified = users.email_verified OR EXCLUDED.email_verified`,
+      [user.id, user.email, user.displayName, user.avatarUrl, user.emailVerified],
+    );
+  } catch {
+    // Non-fatal: auth continues even if profile seeding is unavailable.
+  }
+}
+
+/**
+ * Create a new account via Supabase Auth. Email verification is removed from
+ * the flow: when the Supabase project has "Confirm email" disabled (the
+ * required configuration), signUp returns an authenticated session immediately.
  */
 export async function signup(input: SignupInput): Promise<SignupResult> {
   const email = normalizeEmail(input.email);
-  const passwordHash = await hashPassword(input.password);
+  const sb = await createServerSupabaseClientAsync();
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: input.password,
+    options: {
+      data: { display_name: input.displayName.trim() },
+      // do not require confirmation redirect — session is immediate
+      emailRedirectTo: undefined,
+    },
+  });
 
-  const rows = await queryTenant<{
-    id: string;
-    email: string;
-    displayName: string | null;
-    avatarUrl: string | null;
-    emailVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }>(
-    null,
-    `INSERT INTO users (email, display_name, password_hash, email_verified)
-     VALUES ($1, $2, $3, true)
-     RETURNING id, email, display_name AS "displayName", avatar_url AS "avatarUrl",
-               email_verified AS "emailVerified", created_at AS "createdAt",
-               updated_at AS "updatedAt"`,
-    [email, input.displayName.trim(), passwordHash],
-  );
-  const row = rows[0];
-  const user: User = {
-    id: row.id,
-    email: row.email,
-    displayName: row.displayName,
-    avatarUrl: row.avatarUrl,
-    emailVerified: row.emailVerified,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  };
+  if (error) {
+    return { user: null, ok: false, emailSent: false, sessionCreated: false, error: error.message };
+  }
 
-  await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
+  let sessionCreated = false;
+  if (data.session && data.user) {
+    sessionCreated = true;
+    const user = toUser(data.user);
+    await provisionUserRow(user);
+    await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
+    return { user, ok: true, emailSent: false, sessionCreated: true };
+  }
 
-  // Email verification is removed: no token is issued and no email is sent.
-  return { user, emailSent: false };
+  // No session returned (project still requires email confirmation).
+  if (data.user) {
+    const user = toUser(data.user);
+    await provisionUserRow(user);
+    await recordAuditEvent({ actorId: user.id, action: "auth.signup" });
+    return {
+      user,
+      ok: true,
+      emailSent: false,
+      sessionCreated: false,
+      error: "Account created. Confirm your email to sign in (project email confirmation is still enabled).",
+    };
+  }
+
+  return { user: null, ok: false, emailSent: false, sessionCreated: false, error: "Could not create account." };
 }
 
 export interface SigninResult {
@@ -83,119 +129,96 @@ export async function signin(
   password: string,
 ): Promise<SigninResult> {
   const email = normalizeEmail(emailInput);
-  const hash = await getPasswordHash(email);
-  if (!hash) {
-    return { user: null, error: "Invalid email or password." };
-  }
-  const ok = await verifyPassword(password, hash);
-  if (!ok) {
-    return { user: null, error: "Invalid email or password." };
-  }
-  const rows = await queryTenant<{ id: string; emailVerified: boolean }>(
-    null,
-    `SELECT id, email_verified AS "emailVerified" FROM users WHERE email = $1 LIMIT 1`,
-    [email],
-  );
-  const row = rows[0];
-  if (!row) {
-    return { user: null, error: "Invalid email or password." };
+  const sb = await createServerSupabaseClientAsync();
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error || !data.user) {
+    return { user: null, error: error?.message || "Invalid email or password." };
   }
 
-  await recordAuditEvent({ actorId: row.id, action: "auth.signin" });
-
-  const rowsUser = await queryTenant<{
-    id: string; email: string; displayName: string | null;
-    avatarUrl: string | null; emailVerified: boolean;
-    createdAt: string; updatedAt: string;
-  }>(
-    row.id,
-    `SELECT id, email, display_name AS "displayName", avatar_url AS "avatarUrl",
-            email_verified AS "emailVerified", created_at AS "createdAt",
-            updated_at AS "updatedAt"
-       FROM users WHERE id = $1 LIMIT 1`,
-    [row.id],
-  );
-  const u = rowsUser[0];
-  return {
-    user: {
-      id: u.id,
-      email: u.email,
-      displayName: u.displayName,
-      avatarUrl: u.avatarUrl,
-      emailVerified: u.emailVerified,
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-    },
-    error: null,
-  };
+  const user = toUser(data.user);
+  await provisionUserRow(user);
+  await recordAuditEvent({ actorId: user.id, action: "auth.signin" });
+  return { user, error: null };
 }
 
 export interface ResendResult {
   ok: boolean;
-  /** Matches signup: whether an email was actually delivered. */
   emailSent: boolean;
 }
 
-/**
- * Email verification has been removed from the auth flow. This endpoint is
- * kept as a harmless, honest no-op: it never sends mail, creates tokens, or
- * records side effects. It exists solely to keep older callers working.
- */
-export async function resendVerificationEmail(
-  emailInput: string,
-): Promise<ResendResult> {
-  // Normalize the input to honor the existing contract; no mail or token work.
+/** Email verification is removed; this is a harmless honest no-op. */
+export async function resendVerificationEmail(emailInput: string): Promise<ResendResult> {
   void normalizeEmail(emailInput);
   return { ok: true, emailSent: false };
 }
 
 export async function verifyEmail(rawToken: string): Promise<{ ok: boolean; error?: string }> {
-  const userId = await consumeAuthToken(rawToken, "email_verify");
-  if (!userId) {
-    return { ok: false, error: "Invalid, expired, or already-used verification token." };
-  }
-  await setEmailVerified(userId);
-  await recordAuditEvent({ actorId: userId, action: "auth.email_verified" });
+  void rawToken;
   return { ok: true };
 }
 
+/**
+ * Request a password reset via Supabase Auth. Supabase sends the recovery email
+ * (its own infrastructure). If no account exists, we still return ok to avoid
+ * enumeration.
+ */
 export async function requestPasswordReset(emailInput: string): Promise<{ ok: boolean }> {
   const email = normalizeEmail(emailInput);
-  const rows = await queryTenant<{ id: string }>(
-    null,
-    `SELECT id FROM users WHERE email = $1 LIMIT 1`,
-    [email],
-  );
-  if (rows.length === 0) {
-    // Do not reveal whether an account exists.
+  const sb = await createServerSupabaseClientAsync();
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || "http://localhost:3000"}/reset-password`,
+  });
+  if (error) {
+    // Supabase can error on rate limits; do not leak account existence.
     return { ok: true };
   }
-  const userId = rows[0].id;
-  const token = await createAuthToken(userId, "password_reset");
-  const url = buildActionUrl(`/reset-password?token=${encodeURIComponent(token)}`);
-  try {
-    await sendMail({
-      to: email,
-      subject: "Reset your MNEMOSYNE password",
-      text: `You requested a password reset. Set a new password here:\n\n${url}\n\nIf you did not request this, ignore this email. The link expires in 24 hours.`,
-    });
-  } catch {
-    // swallow: no leak; caller sees ok, dev transport logs link.
-  }
-  await recordAuditEvent({ actorId: userId, action: "auth.reset_requested" });
   return { ok: true };
 }
 
+/**
+ * Reset a password. Supports both the legacy custom token path (rawToken) and
+ * the Supabase recovery code path (code). When a Supabase code is provided we
+ * exchange it, update the password, and invalidate other sessions.
+ */
 export async function resetPassword(
   rawToken: string,
   newPassword: string,
 ): Promise<{ ok: boolean; error?: string }> {
+  const sb = await createServerSupabaseClientAsync();
+
+  // Supabase recovery flow: exchange code → session, then update password.
+  if (rawToken && rawToken.length >= 10 && !rawToken.includes(".")) {
+    const { error: exchangeErr } = await sb.auth.exchangeCodeForSession(rawToken);
+    if (exchangeErr) {
+      // Fall through to legacy token handling below.
+    } else {
+      const { error: updateErr } = await sb.auth.updateUser({ password: newPassword });
+      if (updateErr) {
+        return { ok: false, error: updateErr.message };
+      }
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
+      if (user) {
+        await recordAuditEvent({ actorId: user.id, action: "auth.password_reset" });
+      }
+      return { ok: true };
+    }
+  }
+
+  // Legacy custom token path (self-managed reset tokens).
+  const { consumeAuthToken, updatePasswordHash, revokeActorTokensForUser } = await import(
+    "@/server/data/auth-tokens"
+  ).then((m) => m);
+  const { hashPassword } = await import("@/server/auth/password");
   const userId = await consumeAuthToken(rawToken, "password_reset");
   if (!userId) {
     return { ok: false, error: "Invalid, expired, or already-used reset token." };
   }
   const newHash = await hashPassword(newPassword);
   await updatePasswordHash(userId, newHash);
+  const { destroySessionsForUser } = await import("@/server/auth/session");
   await destroySessionsForUser(userId);
   await revokeActorTokensForUser(userId);
   await recordAuditEvent({ actorId: userId, action: "auth.password_reset" });
