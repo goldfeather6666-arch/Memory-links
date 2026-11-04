@@ -19,6 +19,7 @@ import type {
   ConnectorAdapter,
   FetchPageParams,
   FetchPageResult,
+  RawSource,
 } from "./types";
 
 const DRIVE_BASE = "https://www.googleapis.com/drive/v3";
@@ -41,7 +42,7 @@ async function googleAccount(accessToken: string): Promise<AccountIdentity> {
   };
 }
 
-function toDriveSource(file: Record<string, unknown>): NormalizedSource {
+function toDriveSource(file: Record<string, unknown>): RawSource {
   const parents = Array.isArray(file.parents) ? (file.parents as unknown[]) : [];
   return {
     externalId: typeof file.id === "string" ? file.id : String(file.id ?? ""),
@@ -110,11 +111,9 @@ async function gmailMessageHeaders(
   accessToken: string,
   messageId: string,
 ): Promise<{ subject: string | null; from: string | null }> {
-  const qs = new URLSearchParams({
-    format: "metadata",
-    metadataHeaders: "Subject",
-    metadataHeaders: "From",
-  });
+  const qs = new URLSearchParams({ format: "metadata" });
+  qs.append("metadataHeaders", "Subject");
+  qs.append("metadataHeaders", "From");
   const res = await fetch(
     `${GMAIL_BASE}/messages/${encodeURIComponent(messageId)}?${qs.toString()}`,
     { headers: bearerAuth(accessToken) },
@@ -132,7 +131,7 @@ async function gmailMessageHeaders(
 function toGmailSource(
   message: Record<string, unknown>,
   headers: { subject: string | null; from: string | null },
-): NormalizedSource {
+): RawSource {
   return {
     externalId: typeof message.id === "string" ? message.id : String(message.id ?? ""),
     recordType: "message",
