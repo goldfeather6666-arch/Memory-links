@@ -42,6 +42,8 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npx playwright install --with-deps chromium
+      # Install both engines: the 'mobile' project uses the iPhone 13 device
+      # (WebKit), and 'tablet'/'desktop' run on Chromium.
+      - run: npx playwright install --with-deps chromium webkit
       - name: End-to-end tests
         run: npm run test:e2e
