@@ -161,9 +161,15 @@ export function GraphExplorer({ workspaceId, initialMetrics }: GraphExplorerProp
   const pickSearchResult = (node: GraphNodeData) => {
     setSearchResults([]);
     setSearchQ("");
-    setFocusId(node.id.split(":")[1] ?? node.id);
+    const rawId = node.id.split(":")[1] ?? node.id;
+    setFocusId(rawId);
     setFocusKind(node.kind);
-    setMode("focus");
+    if (node.kind === "entity" && node.type === "project") {
+      setProjectId(rawId);
+      setMode("project");
+    } else {
+      setMode("focus");
+    }
     setSelectedId(node.id);
   };
 
