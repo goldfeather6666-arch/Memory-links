@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { signup } from "@/server/auth/service";
 import { signupSchema } from "@/server/validation/schemas";
 import { checkAuthRateLimit, getClientRequestIp } from "@/server/auth/rate-limit";
+import { isDatabaseConfigured } from "@/lib/env";
 
 function emailFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) return null;
@@ -17,6 +18,13 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Sign-up isn't configured for this environment yet." },
+      { status: 503 },
+    );
   }
 
   const key = emailFromBody(body) ?? getClientRequestIp(req);
